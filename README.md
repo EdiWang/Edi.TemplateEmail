@@ -6,6 +6,7 @@ config template in config and send email in async
 Step 1: Sample mailConfiguration.config under your website root
 ---------------------------------------------------------------
 
+```xml
 <?xml version="1.0"?>
 <mailConfiguration>
   <CommonConfiguration OverrideToAddress="false" ToAddress="" />
@@ -35,19 +36,23 @@ Smtp用户名：{SmtpUserName.Value}<br />
       ]]>
     </MessageBody>
 </mailConfiguration>
+```
 
 Step 2: In your web.config
 --------------------------
 
+```xml
 <configSections>
     ...
     <section name="mailConfiguration" type="Edi.XmlConfigMapper.XmlSection`1[[Edi.Web.TemplateEmail.MailConfiguration, Edi.Web.TemplateEmail, Version=1.0.0.0, Culture=neutral]], Edi.XmlConfigMapper" />
 </configSections>
 <mailConfiguration configSource="mailConfiguration.config" />
+```
 
 Step 3: In your code
 --------------------
 
+```
 public static EmailHelper EmailHelper { get; private set; }
 
 static EmailNotification()
@@ -107,9 +112,11 @@ public static void SendNewCommentNotificationAsync(Comment comment, Post post)
     Task.Run(() => EmailHelper.ApplyTemplate(MailMesageType.NewCommentNotification, pipeline)
         .SendMailAsync(Settings.Settings.Instance.AdminEmail));
 }
+```
 
 **and you can also**
 
+```
 // AfterComplete() will update complete status of the mail for Messages table in db
 await EmailHelper.ApplyTemplate(MailMesageType.ContactMessageForAdmin, pipelineForAdmin)
                  .AfterComplete(async () => await new MessageOperator().UpdateCompleteStatusForMessage(mailId))
@@ -117,3 +124,4 @@ await EmailHelper.ApplyTemplate(MailMesageType.ContactMessageForAdmin, pipelineF
 
 // clear after complete in case of other mail methods using this action
 EmailHelper.AfterCompleteAction = null;
+```
