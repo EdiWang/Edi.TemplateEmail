@@ -3,7 +3,8 @@ Edi.Web.TemplateEmail-TFS-Clone
 
 config template in config and send email in async
 
-sample mailConfiguration.config under your website root:
+Step 1: Sample mailConfiguration.config under your website root
+---------------------------------------------------------------
 
 <?xml version="1.0"?>
 <mailConfiguration>
@@ -35,7 +36,8 @@ Smtp用户名：{SmtpUserName.Value}<br />
     </MessageBody>
 </mailConfiguration>
 
-and in your web.config:
+Step 2: In your web.config
+--------------------------
 
 <configSections>
     ...
@@ -43,7 +45,8 @@ and in your web.config:
 </configSections>
 <mailConfiguration configSource="mailConfiguration.config" />
 
-then in your code:
+Step 3: In your code
+--------------------
 
 public static EmailHelper EmailHelper { get; private set; }
 
@@ -105,7 +108,7 @@ public static void SendNewCommentNotificationAsync(Comment comment, Post post)
         .SendMailAsync(Settings.Settings.Instance.AdminEmail));
 }
 
-and you can also:
+**and you can also**
 
 // AfterComplete() will update complete status of the mail for Messages table in db
 await EmailHelper.ApplyTemplate(MailMesageType.ContactMessageForAdmin, pipelineForAdmin)
