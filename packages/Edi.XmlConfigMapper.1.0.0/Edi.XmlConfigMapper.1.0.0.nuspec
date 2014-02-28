@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Edi.XmlConfigMapper</id>
+    <version>1.0.0</version>
+    <title>Edi.XmlConfigMapper</title>
+    <authors>Edi Wang, Benzi K. Ahamed</authors>
+    <owners>Edi Wang, Benzi K. Ahamed</owners>
+    <projectUrl>http://www.codeproject.com/Articles/22534/Strongly-Typed-Custom-Configuration-Sections-using</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Map a .xml configuration file to a Class, map xml nodes to properties using XmlElement attribute.</description>
+    <summary>Based on "Strongly Typed Custom Configuration Sections using XML Serialization" By Benzi K. Ahamed.
+
+Update to .NET 4.0+</summary>
+    <releaseNotes />
+    <copyright />
+    <language />
+    <tags>XML Configuration</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Configuration" targetFramework=".NETFramework4.0" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

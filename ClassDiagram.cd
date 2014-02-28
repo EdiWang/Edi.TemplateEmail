@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Edi.Web.TemplateEmail.MailConfiguration" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MailConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.MailCommonConfiguration">
+    <Position X="9.25" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAgAAAAAA=</HashCode>
+      <FileName>MailConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.MailMessageConfiguration">
+    <Position X="9.25" Y="5.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAEAAAAAAAAAAIAAAAgAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>MailConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.EmailStateEventArgs">
+    <Position X="7" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EmailHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.EmailHelper">
+    <Position X="0.5" Y="0.5" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Delegate Name="Edi.Web.TemplateEmail.EmailHelper.EmailFailedEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="Edi.Web.TemplateEmail.EmailHelper.EmailSentEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="Edi.Web.TemplateEmail.EmailHelper.EmailCompletedEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>UCAAAAAAIBAIQAAAAAAAAAAAAAQIAIAEkDCAAAAAAMA=</HashCode>
+      <FileName>EmailHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.EmailSettings">
+    <Position X="9.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>ACgAAAIQAABACIAAAAAAAAACAACAAAAAABAAgAAgAAA=</HashCode>
+      <FileName>EmailSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.TemplateEngine" BaseTypeListCollapsed="true">
+    <Position X="4" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAAACAAAAAAgAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>TemplateEngine.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.TemplatePipeline">
+    <Position X="11.75" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAABAAAAAAiACAAAAAAAIAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>TemplatePipeline.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.PipelineItem">
+    <Position X="4" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAQAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TemplatePipeline.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.Web.TemplateEmail.TemplateMailMessage" BaseTypeListCollapsed="true">
+    <Position X="7" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAAIAAAAAAAAAAAAAAAAAACAIAAAA=</HashCode>
+      <FileName>TemplateMailMessage.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Edi.Web.TemplateEmail.IFormatableTextProvider">
+    <Position X="7" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>IFormatableTextProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Edi.Web.TemplateEmail.ITemplateEngine">
+    <Position X="4" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAAAAAAAAAAgAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>ITemplateEngine.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Edi.Web.TemplateEmail.MailMesageType">
+    <Position X="12" Y="3.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>BAACAACAAAAAACABAAAAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>MailConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
