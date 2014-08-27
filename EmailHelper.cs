@@ -274,11 +274,11 @@ namespace Edi.Web.TemplateEmail
 
                 while (current != null)
                 {
+                    LogExceptionAction("Error sending email in SendMailAsync.", current);
+
                     if (errorMsg.Length > 0) { errorMsg.Append(" "); }
                     errorMsg.Append(current.Message);
                     current = current.InnerException;
-
-                    LogExceptionAction("Error sending email in SendMailAsync.", current);
                 }
             }
             finally
