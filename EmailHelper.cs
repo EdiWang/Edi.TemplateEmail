@@ -278,7 +278,7 @@ namespace Edi.Web.TemplateEmail
                     errorMsg.Append(current.Message);
                     current = current.InnerException;
 
-                    LogExceptionAction("Error sending email in SendMailAsync.", ex);
+                    LogExceptionAction("Error sending email in SendMailAsync.", current);
                 }
             }
             finally
