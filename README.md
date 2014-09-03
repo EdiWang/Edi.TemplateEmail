@@ -1,4 +1,4 @@
-Edi.Web.TemplateEmail-TFS-Clone
+Edi.TemplateEmail
 ===============================
 
 config template in config and send email in async
@@ -44,7 +44,7 @@ Step 2: In your web.config
 ```xml
 <configSections>
     ...
-    <section name="mailConfiguration" type="Edi.XmlConfigMapper.XmlSection`1[[Edi.Web.TemplateEmail.MailConfiguration, Edi.Web.TemplateEmail, Version=1.0.0.0, Culture=neutral]], Edi.XmlConfigMapper" />
+    <section name="mailConfiguration" type="Edi.XmlConfigMapper.XmlSection`1[[Edi.TemplateEmail.MailConfiguration, Edi.TemplateEmail, Culture=neutral]], Edi.XmlConfigMapper" />
 </configSections>
 <mailConfiguration configSource="mailConfiguration.config" />
 ```
