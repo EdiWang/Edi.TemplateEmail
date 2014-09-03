@@ -1,6 +1,8 @@
 Edi.TemplateEmail
 ===============================
 
+Important: the old one Edi.Web.TemplatedEmail is renamed to Edi.TemplatedEmail, nuget is here: https://www.nuget.org/packages/Edi.TemplateEmail/
+
 config template in config and send email in async
 
 Step 1: Sample mailConfiguration.config under your website root
