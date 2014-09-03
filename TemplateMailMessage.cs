@@ -2,7 +2,7 @@
 using System.Globalization;
 using Edi.XmlConfigMapper;
 
-namespace Edi.Web.TemplateEmail
+namespace Edi.TemplateEmail
 {
     public class TemplateMailMessage : IFormatableTextProvider
     {

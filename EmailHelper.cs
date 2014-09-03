@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Edi.XmlConfigMapper;
 
-namespace Edi.Web.TemplateEmail
+namespace Edi.TemplateEmail
 {
     public class EmailStateEventArgs : EventArgs
     {

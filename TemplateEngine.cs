@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Edi.Web.TemplateEmail
+namespace Edi.TemplateEmail
 {
     public class TemplateEngine : ITemplateEngine
     {

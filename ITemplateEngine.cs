@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Edi.Web.TemplateEmail
+namespace Edi.TemplateEmail
 {
     public interface ITemplateEngine
     {

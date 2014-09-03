@@ -7,8 +7,8 @@
     <ProjectGuid>{00BDA1F5-AB33-4701-B6E9-F72FC76CA5B0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Edi.Web.TemplateEmail</RootNamespace>
-    <AssemblyName>Edi.Web.TemplateEmail</AssemblyName>
+    <RootNamespace>Edi.TemplateEmail</RootNamespace>
+    <AssemblyName>Edi.TemplateEmail</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
