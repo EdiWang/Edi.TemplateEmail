@@ -35,6 +35,7 @@ Smtp用户名：{SmtpUserName.Value}<br />
 对方IP地址: {IPAddress.Value}
       ]]>
     </MessageBody>
+	</MailMessage>
 </mailConfiguration>
 ```
 
