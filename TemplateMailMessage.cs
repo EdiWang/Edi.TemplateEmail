@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using Edi.XmlConfigMapper;
 
 namespace Edi.TemplateEmail
 {
@@ -34,7 +33,7 @@ namespace Edi.TemplateEmail
         {
             Loaded = false;
 
-            var mailConfiguration = XmlSection<MailConfiguration>.GetSection("mailConfiguration");
+            var mailConfiguration = XmlConfigMapper.XmlSection<MailConfiguration>.GetSection("mailConfiguration");
             if (null == mailConfiguration) return;
 
             // Load all the mail message templates that 

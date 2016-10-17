@@ -66,10 +66,7 @@ namespace Edi.TemplateEmail
             }
         }
 
-        public PipelineItem this[string name]
-        {
-            get { return new PipelineItem { Name = name, Value = _pipeline[name] }; }
-        }
+        public PipelineItem this[string name] => new PipelineItem { Name = name, Value = _pipeline[name] };
 
         public TemplatePipeline()
         {
@@ -108,9 +105,10 @@ namespace Edi.TemplateEmail
             // TODO: Optimize
             try
             {
-                if (Value is string)
+                var s = Value as string;
+                if (s != null)
                 {
-                    return Value as string;
+                    return s;
                 }
                 return !Value.GetType().GetProperties().Any() ? Value.ToString() : Value.GetType().GetProperty(propertyName).GetValue(Value, null).ToString();
             }

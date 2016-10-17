@@ -33,7 +33,7 @@ namespace Edi.TemplateEmail
                 string property = match.Groups["Property"].Value;
                 string value = Pipeline.HasEntity(entity) ? Pipeline[entity].GetValue(property) : string.Empty;
 
-                formattedText.Replace(string.Format("{{{0}.{1}}}", entity, property), value);
+                formattedText.Replace($"{{{entity}.{property}}}", value);
             }
 
             return formattedText.ToString();

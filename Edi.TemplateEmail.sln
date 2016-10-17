@@ -1,16 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.TemplateEmail", "Edi.TemplateEmail.csproj", "{00BDA1F5-AB33-4701-B6E9-F72FC76CA5B0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{AA57932D-0BD8-4679-907A-DDB7F3F68A0E}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.TemplateEmail.UnitTests", "UT\Edi.TemplateEmail.UnitTests\Edi.TemplateEmail.UnitTests.csproj", "{A18D4DFE-778E-481F-AC4D-7F2C56CFE86C}"
 EndProject

@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using Edi.XmlConfigMapper;
 
 namespace Edi.TemplateEmail
 {
@@ -55,10 +54,7 @@ namespace Edi.TemplateEmail
         /// </param>
         private void OnEmailFailed(MailMessage message)
         {
-            if (EmailFailed != null)
-            {
-                EmailFailed(message, new EmailStateEventArgs(false, null));
-            }
+            EmailFailed?.Invoke(message, new EmailStateEventArgs(false, null));
         }
 
         /// <summary>
@@ -69,18 +65,12 @@ namespace Edi.TemplateEmail
         /// </param>
         private void OnEmailSent(MailMessage message)
         {
-            if (EmailSent != null)
-            {
-                EmailSent(message, new EmailStateEventArgs(true, null));
-            }
+            EmailSent?.Invoke(message, new EmailStateEventArgs(true, null));
         }
 
         private void OnEmailComplete(MailMessage message, string exceptionMessage)
         {
-            if (EmailCompleted != null)
-            {
-                EmailCompleted(message, exceptionMessage, new EmailStateEventArgs(true, null));
-            }
+            EmailCompleted?.Invoke(message, exceptionMessage, new EmailStateEventArgs(true, null));
         }
 
         #endregion Events
@@ -149,7 +139,7 @@ namespace Edi.TemplateEmail
 
         public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
         {
-            var mailConfig = XmlSection<MailConfiguration>.GetSection("mailConfiguration");
+            var mailConfig = XmlConfigMapper.XmlSection<MailConfiguration>.GetSection("mailConfiguration");
             if (mailConfig.CommonConfiguration.OverrideToAddress)
             {
                 ToAddressOverride = mailConfig.CommonConfiguration.ToAddress;
@@ -215,7 +205,7 @@ namespace Edi.TemplateEmail
 
             if (Settings.IncludeSignature)
             {
-                messageToSend.Body += string.Format("<p>{0}</p>", Settings.SignatureContent);
+                messageToSend.Body += $"<p>{Settings.SignatureContent}</p>";
             }
 
             if (!string.IsNullOrEmpty(ccAddress))
@@ -283,10 +273,7 @@ namespace Edi.TemplateEmail
             }
             finally
             {
-                if (null != AfterCompleteAction)
-                {
-                    AfterCompleteAction();
-                }
+                AfterCompleteAction?.Invoke();
 
                 OnEmailComplete(messageToSend, errorMsg.ToString());
 

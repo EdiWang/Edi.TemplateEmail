@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,7 +8,7 @@ namespace Edi.TemplateEmail.UnitTests
     [TestClass]
     public class EmailHelperTests
     {
-        public static EmailHelper EmailHelper { get; private set; }
+        public static EmailHelper EmailHelper { get; }
 
         static EmailHelperTests()
         {
@@ -19,7 +18,7 @@ namespace Edi.TemplateEmail.UnitTests
                 {
                     SmtpServer = "smtp.live.com",
                     SmtpUserName = "Edi.Test@outlook.com",
-                    SmtpPassword = "*******",
+                    SmtpPassword = "im1caonihorse",
                     SmtpServerPort = 25,
                     EnableSsl = true,
                     EmailDisplayName = "Edi.TemplateEmail"
@@ -28,7 +27,7 @@ namespace Edi.TemplateEmail.UnitTests
                 .LogExceptionWith((s, exception) => Debug.WriteLine(s + exception.Message));
                 EmailHelper.UseSignature("signature test");
                 EmailHelper.Settings.EmailWithSystemInfo = true;
-                EmailHelper.WithFooter(string.Format("<p>Footer Test</p>"));
+                EmailHelper.WithFooter("<p>Footer Test</p>");
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
         }
