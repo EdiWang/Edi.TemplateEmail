@@ -1,9 +1,13 @@
 Edi.TemplateEmail
 ===============================
 
-Important: the old one Edi.Web.TemplatedEmail is renamed to Edi.TemplatedEmail, nuget is here: https://www.nuget.org/packages/Edi.TemplateEmail/
+This library enable you to configure email in XML template and send the email in your .NET applications.
 
-config template in config and send email in async
+```
+PM > Install-Package Edi.TemplatedEmail
+```
+
+Tested fine with outlook.com email server.
 
 Step 1: Sample mailConfiguration.config under your website root
 ---------------------------------------------------------------
@@ -13,35 +17,23 @@ Step 1: Sample mailConfiguration.config under your website root
 <mailConfiguration>
   <CommonConfiguration OverrideToAddress="false" ToAddress="" />
   <MailMessage MessageType="TestMail" IsHtml="true">
-    <MessageSubject>EdiBlog系统测试邮件</MessageSubject>
+    <MessageSubject>Test Mail on {MachineName.Value}</MessageSubject>
     <MessageBody>
       <![CDATA[
-如果你收到了这封邮件，则证明EdiBlog在 {MachineName.Value} 上的邮件配置已经生效。参数摘要如下：<br />
-Smtp服务器：{SmtpServer.Value}<br />
-Smtp端口：{SmtpServerPort.Value}<br />
-Smtp用户名：{SmtpUserName.Value}<br />
-发件人显示名：{EmailDisplayName.Value}<br />
-启用SSL加密：{EnableSsl.Value}<br /> <br />
-这是一封由系统生成的邮件，请不要傻乎乎的回复。
+Email Sending has been configured on {MachineName.Value} <br />
+Smtp Server: {SmtpServer.Value}<br />
+Smtp Port: {SmtpServerPort.Value}<br />
+Smtp Username: {SmtpUserName.Value}<br />
+Display Name: {EmailDisplayName.Value}<br />
+Require SSL: {EnableSsl.Value}<br />
       ]]>
     </MessageBody>
   </MailMessage>
-  <MailMessage MessageType="NewCommentNotification" IsHtml="true">
-    <MessageSubject>您有新的评论</MessageSubject>
-    <MessageBody>
-      <![CDATA[
-{Username.Value}评论了文章"{Title.Value}": <br />
-{CommentContent.Value} <br /> <br />
-评论时间: {PubDate.Value} <br />
-对方Email地址: {Email.Value} <br />
-对方IP地址: {IPAddress.Value}
-      ]]>
-    </MessageBody>
-	</MailMessage>
+  ...
 </mailConfiguration>
 ```
 
-Step 2: In your web.config
+Step 2: Add Following Section in Web.config
 --------------------------
 
 ```xml
@@ -52,7 +44,7 @@ Step 2: In your web.config
 <mailConfiguration configSource="mailConfiguration.config" />
 ```
 
-Step 3: In your code
+Step 3: C# Sample Code
 --------------------
 
 ```
