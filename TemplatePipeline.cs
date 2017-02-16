@@ -110,7 +110,9 @@ namespace Edi.TemplateEmail
                 {
                     return s;
                 }
-                return !Value.GetType().GetProperties().Any() ? Value.ToString() : Value.GetType().GetProperty(propertyName).GetValue(Value, null).ToString();
+                return !Value.GetType().GetProperties().Any() ? 
+                                        Value.ToString() : 
+                                        Value.GetType().GetProperty(propertyName).GetValue(Value, null).ToString();
             }
             catch
             {

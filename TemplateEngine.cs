@@ -24,8 +24,8 @@ namespace Edi.TemplateEmail
             // They should be in the format {<item name>.<item property>}
             // Eg. {User.FirstName} will be replaced by the FirstName property
             // of the personalization item named "User"
-            MatchCollection matches = Regex.Matches(TextProvider.Text, FormatPattern);
-            StringBuilder formattedText = textSelector(); //new StringBuilder(TextProvider.Text);
+            MatchCollection matches = Regex.Matches(textSelector().ToString(), FormatPattern);
+            StringBuilder formattedText = textSelector();
 
             foreach (Match match in matches)
             {

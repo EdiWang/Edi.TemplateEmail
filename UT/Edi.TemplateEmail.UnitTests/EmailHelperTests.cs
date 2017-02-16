@@ -18,7 +18,7 @@ namespace Edi.TemplateEmail.UnitTests
                 {
                     SmtpServer = "smtp.live.com",
                     SmtpUserName = "Edi.Test@outlook.com",
-                    SmtpPassword = "im1caonihorse",
+                    SmtpPassword = "",
                     SmtpServerPort = 25,
                     EnableSsl = true,
                     EmailDisplayName = "Edi.TemplateEmail"
