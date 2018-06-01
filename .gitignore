@@ -214,3 +214,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 /.vs/Edi.TemplateEmail/v15/sqlite3
+src/.vs/Edi.TemplateEmail/DesignTimeBuild/.dtbcache
+*.lock
+*.ide
+*.ide-shm
+*.ide-wal
