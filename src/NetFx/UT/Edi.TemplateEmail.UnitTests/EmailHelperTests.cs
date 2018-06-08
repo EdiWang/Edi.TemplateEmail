@@ -16,18 +16,16 @@ namespace Edi.TemplateEmail.UnitTests
             {
                 EmailHelper = new EmailHelper(new EmailSettings
                 {
-                    SmtpServer = "smtp.live.com",
+                    SmtpServer = "smtp-mail.outlook.com",
                     SmtpUserName = "Edi.Test@outlook.com",
                     SmtpPassword = "",
-                    SmtpServerPort = 25,
+                    SmtpServerPort = 587,
                     EnableSsl = true,
                     EmailDisplayName = "Edi.TemplateEmail"
                 })
                 .SendAs("Edi.TemplateEmail.UnitTests")
                 .LogExceptionWith((s, exception) => Debug.WriteLine(s + exception.Message));
-                EmailHelper.UseSignature("signature test");
                 EmailHelper.Settings.EmailWithSystemInfo = true;
-                EmailHelper.WithFooter("<p>Footer Test</p>");
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
         }

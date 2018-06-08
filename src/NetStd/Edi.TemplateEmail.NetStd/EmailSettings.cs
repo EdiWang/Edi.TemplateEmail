@@ -1,4 +1,4 @@
-﻿namespace Edi.TemplateEmail
+﻿namespace Edi.TemplateEmail.NetStd
 {
     public class EmailSettings
     {
@@ -8,7 +8,6 @@
         public int SmtpServerPort { get; set; }
         public bool EnableSsl { get; set; }
         public string EmailDisplayName { get; set; }
-        public bool EmailWithSystemInfo { get; set; }
         public string SenderName { get; set; }
         public bool UseDefaultCredentials { get; set; }
     }

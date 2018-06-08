@@ -5,6 +5,20 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="App.config" />
+    <None Remove="mailConfiguration.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="App.config" />
+    <Content Include="mailConfiguration.config" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Edi.TemplateEmail.NetStd\Edi.TemplateEmail.NetStd.csproj" />
   </ItemGroup>

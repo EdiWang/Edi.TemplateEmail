@@ -6,21 +6,8 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edi.TemplateEmail
+namespace Edi.TemplateEmail.NetStd
 {
-    public class EmailStateEventArgs : EventArgs
-    {
-        public bool IsSuccess { get; set; }
-
-        public Guid? EmailId { get; set; }
-
-        public EmailStateEventArgs(bool isSuccess, Guid? emailId)
-        {
-            IsSuccess = isSuccess;
-            EmailId = emailId;
-        }
-    }
-
     public class EmailHelper
     {
         #region Events
@@ -120,7 +107,6 @@ namespace Edi.TemplateEmail
             Settings.SmtpServerPort = smtpServerPort;
             Settings.EnableSsl = enableSSl;
             Settings.EmailDisplayName = emailDisplayName;
-            Settings.EmailWithSystemInfo = emailWithSystemInfo;
         }
 
         public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
@@ -198,33 +184,6 @@ namespace Edi.TemplateEmail
             if (null != attachments && attachments.Any())
             {
                 attachments.ForEach(attachment => messageToSend.Attachments.Add(attachment));
-            }
-
-            if (Settings.EmailWithSystemInfo)
-            {
-                try
-                {
-                    const string footer = "\r\n\r\nServer Name:{0}\r\nServer IP Address:{1}";
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    string ipAddresses = string.Empty;
-                    foreach (var ip in host.AddressList)
-                    {
-                        if (ipAddresses.Length > 0)
-                        {
-                            ipAddresses += "; ";
-                        }
-
-                        if (!ip.IsIPv6LinkLocal && !ip.IsIPv6Multicast && !ip.IsIPv6SiteLocal)
-                        {
-                            ipAddresses += ip.ToString();
-                        }
-                    }
-                    messageToSend.Body += string.Format(footer, host.HostName, ipAddresses);
-                }
-                catch
-                {
-                    // Eat up the exception, pretend to be unaware of it :) 
-                }
             }
 
             try
