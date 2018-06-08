@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>2018.1.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>.NET Standard 2.0 implementation for Edi.TemplateEmail</Description>
+    <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
+    <Copyright>(c) 2018 edi.wang</Copyright>
+    <PackageProjectUrl>http://edi.wang</PackageProjectUrl>
+    <PackageTags>Email</PackageTags>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
