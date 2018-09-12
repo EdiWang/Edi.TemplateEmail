@@ -22,7 +22,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                     SmtpServerPort = 587,
                     EnableSsl = true,
                     EmailDisplayName = "Edi.TemplateEmail.NetStd"
-                }).SendAs("Edi.TemplateEmail.NetStd.TestConsole");
+                }, "Edi.TemplateEmail.NetStd.TestConsole");
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
 
@@ -62,7 +62,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 }
             };
 
-            var pipeline = new TemplatePipeline().Map("MachineName", System.Environment.MachineName)
+            var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
                 .Map("SmtpServerPort", EmailHelper.Settings.SmtpServerPort)
                 .Map("SmtpUserName", EmailHelper.Settings.SmtpUserName)

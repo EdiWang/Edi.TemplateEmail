@@ -65,42 +65,26 @@ namespace Edi.TemplateEmail.NetStd
 
         #region Properties
 
-        public EmailSettings Settings { get; set; }
-        public Action AfterCompleteAction { get; set; }
-        public string ToAddressOverride { get; set; }
-        public TemplateEngine CurrentEngine { get; set; }
+        public EmailSettings Settings { get; }
+        public string ToAddressOverride { get; private set; }
+        public TemplateEngine CurrentEngine { get; private set; }
 
         #endregion
 
-        #region Builder Methods
-
-        public EmailHelper AfterComplete(Action afterCompleteAction)
+        public EmailHelper(EmailSettings settings, string senderName = null)
         {
-            AfterCompleteAction = afterCompleteAction;
-            return this;
-        }
-
-        public EmailHelper SendAs(string senderName)
-        {
-            Settings.SenderName = senderName;
-            return this;
-        }
-
-        #endregion
-
-        public EmailHelper(EmailSettings settings)
-        {
-            Settings = settings;
-        }
-
-        public EmailHelper(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort, bool enableSSl, string emailDisplayName, bool emailWithSystemInfo = false)
-        {
-            Settings.SmtpServer = smtpServer;
-            Settings.SmtpUserName = smtpUserName;
-            Settings.SmtpPassword = smtpPassword;
-            Settings.SmtpServerPort = smtpServerPort;
-            Settings.EnableSsl = enableSSl;
-            Settings.EmailDisplayName = emailDisplayName;
+            if (null != settings)
+            {
+                Settings = settings;
+                if (null != senderName)
+                {
+                    Settings.SenderName = senderName;
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
         }
 
         public EmailHelper ApplyTemplate(MailConfiguration mailConfig, string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
@@ -129,7 +113,15 @@ namespace Edi.TemplateEmail.NetStd
         public async Task SendMailAsync(IEnumerable<string> toAddress,
             TemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
         {
-            // create smtp client
+            switch (CurrentEngine)
+            {
+                case null when templateEngine == null:
+                    throw new Exception("TemplateEngine must be specified.");
+                case null when true:
+                    CurrentEngine = templateEngine;
+                    break;
+            }
+
             var smtp = new SmtpClient(Settings.SmtpServer);
             if (!string.IsNullOrEmpty(Settings.SmtpUserName))
             {
@@ -139,17 +131,6 @@ namespace Edi.TemplateEmail.NetStd
             }
             smtp.Port = Settings.SmtpServerPort;
             smtp.EnableSsl = Settings.EnableSsl;
-
-            // check engine instance
-            if (CurrentEngine == null && templateEngine == null)
-            {
-                throw new Exception("TemplateEngine must be specified.");
-            }
-
-            if (CurrentEngine == null && templateEngine != null)
-            {
-                CurrentEngine = templateEngine;
-            }
 
             // create mail message
             var messageToSend = new MailMessage
@@ -181,14 +162,13 @@ namespace Edi.TemplateEmail.NetStd
                 await smtp.SendMailAsync(messageToSend);
                 OnEmailSent(messageToSend);
             }
-            catch (SmtpException ex)
+            catch (SmtpException)
             {
                 OnEmailFailed(messageToSend);
                 throw;
             }
             finally
             {
-                AfterCompleteAction?.Invoke();
                 OnEmailComplete(messageToSend);
                 messageToSend.Dispose();
             }
