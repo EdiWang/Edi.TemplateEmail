@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd.TestConsole
 {
@@ -40,6 +42,26 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
 
         public static async Task TestSendTestMail()
         {
+            // TODO: fuck this into xml config source
+            var mailConfig = new MailConfiguration()
+            {
+                CommonConfiguration = new MailCommonConfiguration()
+                {
+                    OverrideToAddress = false,
+                    ToAddress = "test@hello.com"
+                },
+                MailMessages = new List<MailMessageConfiguration>()
+                {
+                    new MailMessageConfiguration()
+                    {
+                        IsHtml = true,
+                        MessageBody = "Hello {MachineName.Value}",
+                        MessageSubject = "Test Mail on {MachineName.Value}",
+                        MessageType = "TestMail"
+                    }
+                }
+            };
+
             var pipeline = new TemplatePipeline().Map("MachineName", System.Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
                 .Map("SmtpServerPort", EmailHelper.Settings.SmtpServerPort)
@@ -52,7 +74,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 isOk = false;
             };
 
-            await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
+            await EmailHelper.ApplyTemplate(mailConfig, "TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
         }
     }
 }

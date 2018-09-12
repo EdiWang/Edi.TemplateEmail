@@ -3,7 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Edi.TemplateEmail.NetStd.XmlConfigMapper
+namespace Edi.TemplateEmail.Configuration
 {
     public class XmlSection<T> : ConfigurationSection where T : class
     {
@@ -16,7 +16,7 @@ namespace Edi.TemplateEmail.NetStd.XmlConfigMapper
             return xmlSection?._configurationItem;
         }
 
-        public static T GetSection(string sectionName, Configuration configuration)
+        public static T GetSection(string sectionName, System.Configuration.Configuration configuration)
         {
             var xmlSection = (XmlSection<T>)configuration.GetSection(sectionName);
             return xmlSection?._configurationItem;

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Xml;
 
-namespace Edi.TemplateEmail.NetStd.XmlConfigMapper
+namespace Edi.TemplateEmail.Configuration
 {
     public class XmlSectionWriter : XmlTextWriter
     {

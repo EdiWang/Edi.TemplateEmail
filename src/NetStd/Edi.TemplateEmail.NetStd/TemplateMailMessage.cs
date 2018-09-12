@@ -1,40 +1,24 @@
 ﻿using System;
 using System.Globalization;
-using Edi.TemplateEmail.NetStd.XmlConfigMapper;
+using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd
 {
     public class TemplateMailMessage
     {
-        /// <summary>
-        /// Gets the text.
-        /// </summary>
-        /// <value>The text.</value>
         public string Text { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is HTML.
-        /// </summary>
-        /// <value><c>true</c> if this instance is HTML; otherwise, <c>false</c>.</value>
         public bool IsHtml { get; set; }
 
-        /// <summary>
-        /// Gets or sets the subject.
-        /// </summary>
-        /// <value>The subject.</value>
         public string Subject { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="TemplateMailMessage"/> is loaded.
-        /// </summary>
-        /// <value><c>true</c> if loaded; otherwise, <c>false</c>.</value>
         public bool Loaded { get; private set; }
 
-        public TemplateMailMessage(string messageType)
+        public TemplateMailMessage(MailConfiguration mailConfig, string messageType)
         {
             Loaded = false;
 
-            var mailConfiguration = XmlSection<MailConfiguration>.GetSection("mailConfiguration");
+            var mailConfiguration = mailConfig;
             if (null == mailConfiguration) return;
 
             // Load all the mail message templates that 

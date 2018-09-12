@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Edi.TemplateEmail.NetStd.XmlConfigMapper
+namespace Edi.TemplateEmail.Configuration
 {
     internal static class SerializerCache
     {

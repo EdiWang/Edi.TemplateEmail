@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd
 {
@@ -102,15 +103,14 @@ namespace Edi.TemplateEmail.NetStd
             Settings.EmailDisplayName = emailDisplayName;
         }
 
-        public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
+        public EmailHelper ApplyTemplate(MailConfiguration mailConfig, string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
         {
-            var mailConfig = XmlConfigMapper.XmlSection<MailConfiguration>.GetSection("mailConfiguration");
             if (mailConfig.CommonConfiguration.OverrideToAddress)
             {
                 ToAddressOverride = mailConfig.CommonConfiguration.ToAddress;
             }
 
-            var messageToPersonalize = new TemplateMailMessage(mailType);
+            var messageToPersonalize = new TemplateMailMessage(mailConfig, mailType);
             if (messageToPersonalize.Loaded)
             {
                 var engine = new TemplateEngine(messageToPersonalize, pipeline);
