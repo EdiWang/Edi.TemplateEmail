@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using Edi.TemplateEmail.NetStd.XmlConfigMapper;
 
 namespace Edi.TemplateEmail.NetStd
 {
-    public class TemplateMailMessage : IFormatableTextProvider
+    public class TemplateMailMessage
     {
         /// <summary>
         /// Gets the text.
@@ -33,7 +34,7 @@ namespace Edi.TemplateEmail.NetStd
         {
             Loaded = false;
 
-            var mailConfiguration = XmlConfigMapper.XmlSection<MailConfiguration>.GetSection("mailConfiguration");
+            var mailConfiguration = XmlSection<MailConfiguration>.GetSection("mailConfiguration");
             if (null == mailConfiguration) return;
 
             // Load all the mail message templates that 

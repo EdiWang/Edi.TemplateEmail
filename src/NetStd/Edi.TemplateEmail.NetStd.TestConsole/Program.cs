@@ -20,9 +20,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                     SmtpServerPort = 587,
                     EnableSsl = true,
                     EmailDisplayName = "Edi.TemplateEmail.NetStd"
-                })
-                .SendAs("Edi.TemplateEmail.NetStd.TestConsole")
-                .LogExceptionWith((s, exception) => Debug.WriteLine(s + exception.Message));
+                }).SendAs("Edi.TemplateEmail.NetStd.TestConsole");
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
 
@@ -54,8 +52,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 isOk = false;
             };
 
-            await EmailHelper.ApplyTemplate("TestMail", pipeline)
-                .SendMailAsync("Edi.Wang@outlook.com");
+            await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
         }
     }
 }

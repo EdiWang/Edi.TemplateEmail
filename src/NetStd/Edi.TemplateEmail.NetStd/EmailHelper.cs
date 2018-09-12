@@ -31,7 +31,7 @@ namespace Edi.TemplateEmail.NetStd
         /// </summary>
         public event EmailCompletedEventHandler EmailCompleted;
 
-        public delegate void EmailCompletedEventHandler(object sender, string exceptionMessage, EmailStateEventArgs e);
+        public delegate void EmailCompletedEventHandler(object sender, EmailStateEventArgs e);
 
         /// <summary>
         /// The on email failed.
@@ -55,9 +55,9 @@ namespace Edi.TemplateEmail.NetStd
             EmailSent?.Invoke(message, new EmailStateEventArgs(true, null));
         }
 
-        private void OnEmailComplete(MailMessage message, string exceptionMessage)
+        private void OnEmailComplete(MailMessage message)
         {
-            EmailCompleted?.Invoke(message, exceptionMessage, new EmailStateEventArgs(true, null));
+            EmailCompleted?.Invoke(message, new EmailStateEventArgs(true, null));
         }
 
         #endregion Events
@@ -66,9 +66,8 @@ namespace Edi.TemplateEmail.NetStd
 
         public EmailSettings Settings { get; set; }
         public Action AfterCompleteAction { get; set; }
-        public Action<string, Exception> LogExceptionAction { get; set; }
         public string ToAddressOverride { get; set; }
-        public ITemplateEngine CurrentEngine { get; set; }
+        public TemplateEngine CurrentEngine { get; set; }
 
         #endregion
 
@@ -77,12 +76,6 @@ namespace Edi.TemplateEmail.NetStd
         public EmailHelper AfterComplete(Action afterCompleteAction)
         {
             AfterCompleteAction = afterCompleteAction;
-            return this;
-        }
-
-        public EmailHelper LogExceptionWith(Action<string, Exception> logExceptionAction)
-        {
-            LogExceptionAction = logExceptionAction;
             return this;
         }
 
@@ -128,16 +121,14 @@ namespace Edi.TemplateEmail.NetStd
         }
 
         public async Task SendMailAsync(string toAddress,
-            ITemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
+            TemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
         {
             await SendMailAsync(new[] { toAddress }, templateEngine, ccAddress, attachments);
         }
 
         public async Task SendMailAsync(IEnumerable<string> toAddress,
-            ITemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
+            TemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
         {
-            var errorMsg = new StringBuilder();
-
             // create smtp client
             var smtp = new SmtpClient(Settings.SmtpServer);
             if (!string.IsNullOrEmpty(Settings.SmtpUserName))
@@ -161,14 +152,13 @@ namespace Edi.TemplateEmail.NetStd
             }
 
             // create mail message
-            var templateMailMessage = CurrentEngine.TextProvider as TemplateMailMessage;
             var messageToSend = new MailMessage
             {
                 Sender = new MailAddress(Settings.SmtpUserName, Settings.SenderName),
                 From = new MailAddress(Settings.SmtpUserName, Settings.EmailDisplayName),
                 Body = CurrentEngine.Format(() => new StringBuilder(CurrentEngine.TextProvider.Text)).Trim(),
                 Subject = CurrentEngine.Format(() => new StringBuilder(CurrentEngine.TextProvider.Subject)).Trim(),
-                IsBodyHtml = templateMailMessage != null && templateMailMessage.IsHtml
+                IsBodyHtml = CurrentEngine.TextProvider is TemplateMailMessage templateMailMessage && templateMailMessage.IsHtml
             };
 
             foreach (var add in toAddress)
@@ -194,26 +184,12 @@ namespace Edi.TemplateEmail.NetStd
             catch (SmtpException ex)
             {
                 OnEmailFailed(messageToSend);
-
-                errorMsg.Append("Error sending email in SendMailAsync: ");
-                Exception current = ex;
-
-                while (current != null)
-                {
-                    LogExceptionAction("Error sending email in SendMailAsync.", current);
-
-                    if (errorMsg.Length > 0) { errorMsg.Append(" "); }
-                    errorMsg.Append(current.Message);
-                    current = current.InnerException;
-                }
+                throw;
             }
             finally
             {
                 AfterCompleteAction?.Invoke();
-
-                OnEmailComplete(messageToSend, errorMsg.ToString());
-
-                // Remove the pointer to the message object so the GC can close the thread.
+                OnEmailComplete(messageToSend);
                 messageToSend.Dispose();
             }
         }

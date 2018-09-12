@@ -4,15 +4,15 @@ using System.Text.RegularExpressions;
 
 namespace Edi.TemplateEmail.NetStd
 {
-    public class TemplateEngine : ITemplateEngine
+    public class TemplateEngine
     {
         private const string FormatPattern = @"{(?<Entity>\w+).(?<Property>\w+)";
 
         public TemplatePipeline Pipeline { get; private set; }
 
-        public IFormatableTextProvider TextProvider { get; private set; }
+        public TemplateMailMessage TextProvider { get; private set; }
 
-        public TemplateEngine(IFormatableTextProvider provider, TemplatePipeline pipeline)
+        public TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
         {
             TextProvider = provider;
             Pipeline = pipeline;
