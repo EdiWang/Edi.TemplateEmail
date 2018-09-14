@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd.TestConsole
@@ -14,15 +16,12 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
         {
             if (EmailHelper == null)
             {
-                EmailHelper = new EmailHelper(new EmailSettings
-                {
-                    SmtpServer = "smtp-mail.outlook.com",
-                    SmtpUserName = "Edi.Test@outlook.com",
-                    SmtpPassword = "",
-                    SmtpServerPort = 587,
-                    EnableSsl = true,
-                    EmailDisplayName = "Edi.TemplateEmail.NetStd"
-                }, "Edi.TemplateEmail.NetStd.TestConsole");
+                EmailHelper = new EmailHelper(
+                    new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "", 587)
+                    {
+                        EnableSsl = true,
+                        EmailDisplayName = "Edi.TemplateEmail.NetStd"
+                    }, "Edi.TemplateEmail.NetStd.TestConsole");
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
 
@@ -42,25 +41,15 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
 
         public static async Task TestSendTestMail()
         {
-            // TODO: fuck this into xml config source
-            var mailConfig = new MailConfiguration()
+            bool isOk = true;
+            MailConfiguration mailConfiguration;
+
+            var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.config";
+            XmlSerializer serializer = new XmlSerializer(typeof(MailConfiguration));
+            using (FileStream fileStream = new FileStream(configSource, FileMode.Open))
             {
-                CommonConfiguration = new MailCommonConfiguration()
-                {
-                    OverrideToAddress = false,
-                    ToAddress = "test@hello.com"
-                },
-                MailMessages = new List<MailMessageConfiguration>()
-                {
-                    new MailMessageConfiguration()
-                    {
-                        IsHtml = true,
-                        MessageBody = "Hello {MachineName.Value}",
-                        MessageSubject = "Test Mail on {MachineName.Value}",
-                        MessageType = "TestMail"
-                    }
-                }
-            };
+                mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
+            }
 
             var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
@@ -68,13 +57,13 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 .Map("SmtpUserName", EmailHelper.Settings.SmtpUserName)
                 .Map("EmailDisplayName", EmailHelper.Settings.EmailDisplayName)
                 .Map("EnableSsl", EmailHelper.Settings.EnableSsl);
-            bool isOk = true;
+
             EmailHelper.EmailFailed += (s, e) =>
             {
                 isOk = false;
             };
 
-            await EmailHelper.ApplyTemplate(mailConfig, "TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
+            await EmailHelper.ApplyTemplate(mailConfiguration, "TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
         }
     }
 }
