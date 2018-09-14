@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Net.Mail;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd.TestConsole
 {
@@ -26,14 +23,25 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 };
 
                 EmailHelper = new EmailHelper(configSource, settings);
-                //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
+                EmailHelper.EmailSent += (sender, eventArgs) =>
+                {
+                    if (sender is MailMessage msg)
+                        Console.WriteLine($"Email {msg.Subject} is sent, Success: {eventArgs.IsSuccess}");
+                };
+                EmailHelper.EmailFailed += (sender, eventArgs) =>
+                {
+                    Console.WriteLine("Failed");
+                };
+                EmailHelper.EmailCompleted += (sender, e) =>
+                {
+                    Console.WriteLine("Completed.");
+                };
             }
 
             try
             {
                 Console.WriteLine("Sending Email...");
                 await TestSendTestMail();
-                Console.WriteLine("Success");
             }
             catch (Exception e)
             {

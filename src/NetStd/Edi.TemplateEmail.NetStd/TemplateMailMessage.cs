@@ -18,12 +18,11 @@ namespace Edi.TemplateEmail.NetStd
         {
             Loaded = false;
 
-            var mailConfiguration = mailConfig;
-            if (null == mailConfiguration) return;
+            if (null == mailConfig) return;
 
             // Load all the mail message templates that 
             // match the message type
-            var possibleMails = mailConfiguration.MailMessages.FindAll(mail => 
+            var possibleMails = mailConfig.MailMessages.FindAll(mail => 
                 string.CompareOrdinal(mail.MessageType, messageType) == 0);
             if (possibleMails.Count == 0) return;
 

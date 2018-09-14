@@ -16,44 +16,23 @@ namespace Edi.TemplateEmail.NetStd
     {
         #region Events
 
-        /// <summary>
-        ///     Occurs after an e-mail blow up. The sender is the MailMessage object.
-        /// </summary>
         public event EmailFailedEventHandler EmailFailed;
 
         public delegate void EmailFailedEventHandler(object sender, EmailStateEventArgs e);
 
-        /// <summary>
-        ///     Occurs after an e-mail has been sent. The sender is the MailMessage object.
-        /// </summary>
         public event EmailSentEventHandler EmailSent;
 
         public delegate void EmailSentEventHandler(object sender, EmailStateEventArgs e);
 
-        /// <summary>
-        ///     Occurs after an e-mail has been sent no matter blow up or not. The sender is the MailMessage object.
-        /// </summary>
         public event EmailCompletedEventHandler EmailCompleted;
 
         public delegate void EmailCompletedEventHandler(object sender, EmailStateEventArgs e);
 
-        /// <summary>
-        /// The on email failed.
-        /// </summary>
-        /// <param name="message">
-        /// The message.
-        /// </param>
         private void OnEmailFailed(MailMessage message)
         {
             EmailFailed?.Invoke(message, new EmailStateEventArgs(false, null));
         }
 
-        /// <summary>
-        /// The on email sent.
-        /// </summary>
-        /// <param name="message">
-        /// The message.
-        /// </param>
         private void OnEmailSent(MailMessage message)
         {
             EmailSent?.Invoke(message, new EmailStateEventArgs(true, null));
@@ -69,12 +48,10 @@ namespace Edi.TemplateEmail.NetStd
         #region Properties
 
         public EmailSettings Settings { get; }
-        public string ToAddressOverride { get; private set; }
+
         public TemplateEngine CurrentEngine { get; private set; }
 
         #endregion
-
-        private string ConfigSource { get; }
 
         private readonly MailConfiguration _mailConfiguration;
 
@@ -85,50 +62,45 @@ namespace Edi.TemplateEmail.NetStd
                 throw new ArgumentNullException(nameof(configSource));
             }
 
-            ConfigSource = configSource;
-            
-            if (null != settings)
-            {
-                Settings = settings;
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
-                XmlSerializer serializer = new XmlSerializer(typeof(MailConfiguration));
-                using (FileStream fileStream = new FileStream(configSource, FileMode.Open))
-                {
-                    _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
-                }
-            }
-            else
+            var serializer = new XmlSerializer(typeof(MailConfiguration));
+            using (var fileStream = new FileStream(configSource, FileMode.Open))
             {
-                throw new ArgumentNullException(nameof(settings));
+                _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
             }
         }
 
-        public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
+        public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline)
         {
-            if (_mailConfiguration.CommonConfiguration.OverrideToAddress)
-            {
-                ToAddressOverride = _mailConfiguration.CommonConfiguration.ToAddress;
-            }
-
             var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, mailType);
             if (messageToPersonalize.Loaded)
             {
                 var engine = new TemplateEngine(messageToPersonalize, pipeline);
                 CurrentEngine = engine;
-                return this;
             }
-            return null;
+            return this;
         }
 
         public async Task SendMailAsync(string toAddress,
             TemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
         {
+            if (string.IsNullOrWhiteSpace(toAddress))
+            {
+                throw new ArgumentNullException(nameof(toAddress));
+            }
             await SendMailAsync(new[] { toAddress }, templateEngine, ccAddress, attachments);
         }
 
         public async Task SendMailAsync(IEnumerable<string> toAddress,
             TemplateEngine templateEngine = null, string ccAddress = null, List<Attachment> attachments = null)
         {
+            var enumerable = toAddress as string[] ?? toAddress.ToArray();
+            if (!enumerable.Any())
+            {
+                throw new ArgumentNullException(nameof(toAddress));
+            }
+
             switch (CurrentEngine)
             {
                 case null when templateEngine == null:
@@ -157,9 +129,10 @@ namespace Edi.TemplateEmail.NetStd
                 IsBodyHtml = CurrentEngine.TextProvider is TemplateMailMessage templateMailMessage && templateMailMessage.IsHtml
             };
 
-            foreach (var add in toAddress)
+            foreach (var add in enumerable)
             {
-                messageToSend.To.Add(!string.IsNullOrEmpty(ToAddressOverride) ? ToAddressOverride : add);
+                messageToSend.To.Add(_mailConfiguration.CommonConfiguration.OverrideToAddress ?
+                    _mailConfiguration.CommonConfiguration.ToAddress : add);
             }
 
             if (!string.IsNullOrEmpty(ccAddress))
