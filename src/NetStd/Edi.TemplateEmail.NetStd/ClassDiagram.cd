@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Edi.TemplateEmail.NetStd.EmailHelper">
+    <Position X="0.5" Y="0.5" Width="3.25" />
+    <NestedTypes>
+      <Delegate Name="Edi.TemplateEmail.NetStd.EmailHelper.EmailFailedEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="Edi.TemplateEmail.NetStd.EmailHelper.EmailSentEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="Edi.TemplateEmail.NetStd.EmailHelper.EmailCompletedEventHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>EmailHelper.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAIBAIABAAAAAAAAAAAAQAAAAEkACAAAgAAMA=</HashCode>
+      <FileName>EmailHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.EmailSettings">
+    <Position X="8.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIQAABACAAAAAAAAAACAACAAAAAAAAAAAAgAAE=</HashCode>
+      <FileName>EmailSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.EmailStateEventArgs">
+    <Position X="4" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EmailStateEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.TemplateEngine">
+    <Position X="4" Y="2" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAAACAAAAAAgAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>TemplateEngine.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.TemplateMailMessage">
+    <Position X="6" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAAIAAAAAAAAAAAAAAAAAACAIAAAA=</HashCode>
+      <FileName>TemplateMailMessage.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.TemplatePipeline">
+    <Position X="0.5" Y="5.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAABAAAAAAiACAAAAAAAIAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>TemplatePipeline.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.PipelineItem">
+    <Position X="4" Y="7" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAQAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TemplatePipeline.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.Models.MailCommonConfiguration">
+    <Position X="8.25" Y="6" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAgAAAAAA=</HashCode>
+      <FileName>Models\MailCommonConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.Models.MailConfiguration">
+    <Position X="4" Y="0.5" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\MailConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edi.TemplateEmail.NetStd.Models.MailMessageConfiguration">
+    <Position X="8.25" Y="3.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAEAAAAAAAAAAIAAAAgAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>Models\MailMessageConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

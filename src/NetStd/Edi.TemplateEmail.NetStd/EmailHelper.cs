@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Edi.TemplateEmail.NetStd.Models;
 
 namespace Edi.TemplateEmail.NetStd
@@ -71,14 +74,27 @@ namespace Edi.TemplateEmail.NetStd
 
         #endregion
 
-        public EmailHelper(EmailSettings settings, string senderName = null)
+        private string ConfigSource { get; }
+
+        private readonly MailConfiguration _mailConfiguration;
+
+        public EmailHelper(string configSource, EmailSettings settings)
         {
+            if (string.IsNullOrWhiteSpace(configSource))
+            {
+                throw new ArgumentNullException(nameof(configSource));
+            }
+
+            ConfigSource = configSource;
+            
             if (null != settings)
             {
                 Settings = settings;
-                if (null != senderName)
+
+                XmlSerializer serializer = new XmlSerializer(typeof(MailConfiguration));
+                using (FileStream fileStream = new FileStream(configSource, FileMode.Open))
                 {
-                    Settings.SenderName = senderName;
+                    _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
                 }
             }
             else
@@ -87,14 +103,14 @@ namespace Edi.TemplateEmail.NetStd
             }
         }
 
-        public EmailHelper ApplyTemplate(MailConfiguration mailConfig, string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
+        public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline, Action emailSentAction = null, Action emailFailedAction = null)
         {
-            if (mailConfig.CommonConfiguration.OverrideToAddress)
+            if (_mailConfiguration.CommonConfiguration.OverrideToAddress)
             {
-                ToAddressOverride = mailConfig.CommonConfiguration.ToAddress;
+                ToAddressOverride = _mailConfiguration.CommonConfiguration.ToAddress;
             }
 
-            var messageToPersonalize = new TemplateMailMessage(mailConfig, mailType);
+            var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, mailType);
             if (messageToPersonalize.Loaded)
             {
                 var engine = new TemplateEngine(messageToPersonalize, pipeline);
@@ -126,8 +142,7 @@ namespace Edi.TemplateEmail.NetStd
             if (!string.IsNullOrEmpty(Settings.SmtpUserName))
             {
                 smtp.UseDefaultCredentials = Settings.UseDefaultCredentials;
-                smtp.Credentials = new NetworkCredential(
-                    Settings.SmtpUserName, Settings.SmtpPassword);
+                smtp.Credentials = new NetworkCredential(Settings.SmtpUserName, Settings.SmtpPassword);
             }
             smtp.Port = Settings.SmtpServerPort;
             smtp.EnableSsl = Settings.EnableSsl;

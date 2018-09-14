@@ -14,14 +14,18 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
 
         static async Task Main(string[] args)
         {
+            var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.config";
+
             if (EmailHelper == null)
             {
-                EmailHelper = new EmailHelper(
-                    new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "", 587)
-                    {
-                        EnableSsl = true,
-                        EmailDisplayName = "Edi.TemplateEmail.NetStd"
-                    }, "Edi.TemplateEmail.NetStd.TestConsole");
+                var settings = new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "", 587)
+                {
+                    EnableSsl = true,
+                    EmailDisplayName = "Edi.TemplateEmail.NetStd",
+                    SenderName = "Test Sender"
+                };
+
+                EmailHelper = new EmailHelper(configSource, settings);
                 //EmailHelper.EmailCompleted += (sender, message, args) => WriteEmailLog(sender as MailMessage, message);
             }
 
@@ -42,14 +46,6 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
         public static async Task TestSendTestMail()
         {
             bool isOk = true;
-            MailConfiguration mailConfiguration;
-
-            var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.config";
-            XmlSerializer serializer = new XmlSerializer(typeof(MailConfiguration));
-            using (FileStream fileStream = new FileStream(configSource, FileMode.Open))
-            {
-                mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
-            }
 
             var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
@@ -63,7 +59,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 isOk = false;
             };
 
-            await EmailHelper.ApplyTemplate(mailConfiguration, "TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
+            await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
         }
     }
 }
