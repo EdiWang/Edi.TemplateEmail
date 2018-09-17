@@ -11,7 +11,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
 
         static async Task Main(string[] args)
         {
-            var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.config";
+            var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
 
             if (EmailHelper == null)
             {
