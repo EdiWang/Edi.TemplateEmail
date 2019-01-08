@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/NetStd/Edi.TemplateEmail.NetStd.TestConsole/Edi.TemplateEmail.NetStd.TestConsole.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
