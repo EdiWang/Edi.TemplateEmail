@@ -16,8 +16,6 @@
 
         public string SenderName { get; set; }
 
-        public bool UseDefaultCredentials { get; set; }
-
         public EmailSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
         {
             SmtpServer = smtpServer;

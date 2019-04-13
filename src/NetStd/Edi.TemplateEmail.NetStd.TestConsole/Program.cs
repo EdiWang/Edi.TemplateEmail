@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Edi.TemplateEmail.NetStd.TestConsole
