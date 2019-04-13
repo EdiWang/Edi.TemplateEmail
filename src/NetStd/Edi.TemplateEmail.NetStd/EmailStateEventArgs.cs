@@ -8,6 +8,8 @@ namespace Edi.TemplateEmail.NetStd
 
         public Guid? EmailId { get; set; }
 
+        public string ServerResponse { get; set; }
+
         public EmailStateEventArgs(bool isSuccess, Guid? emailId)
         {
             IsSuccess = isSuccess;

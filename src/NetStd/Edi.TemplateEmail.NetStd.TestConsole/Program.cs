@@ -25,8 +25,7 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
                 EmailHelper = new EmailHelper(configSource, settings);
                 EmailHelper.EmailSent += (sender, eventArgs) =>
                 {
-                    if (sender is MailMessage msg)
-                        Console.WriteLine($"Email {msg.Subject} is sent, Success: {eventArgs.IsSuccess}");
+                    Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
                 };
                 EmailHelper.EmailFailed += (sender, eventArgs) =>
                 {
@@ -53,19 +52,12 @@ namespace Edi.TemplateEmail.NetStd.TestConsole
 
         public static async Task TestSendTestMail()
         {
-            bool isOk = true;
-
             var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
                 .Map("SmtpServerPort", EmailHelper.Settings.SmtpServerPort)
                 .Map("SmtpUserName", EmailHelper.Settings.SmtpUserName)
                 .Map("EmailDisplayName", EmailHelper.Settings.EmailDisplayName)
                 .Map("EnableSsl", EmailHelper.Settings.EnableSsl);
-
-            EmailHelper.EmailFailed += (s, e) =>
-            {
-                isOk = false;
-            };
 
             await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
         }

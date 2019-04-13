@@ -34,9 +34,12 @@ namespace Edi.TemplateEmail.NetStd
             EmailFailed?.Invoke(message, new EmailStateEventArgs(false, null));
         }
 
-        private void OnEmailSent(MimeMessage message)
+        private void OnEmailSent(MimeMessage message, string response)
         {
-            EmailSent?.Invoke(message, new EmailStateEventArgs(true, null));
+            EmailSent?.Invoke(message, new EmailStateEventArgs(true, null)
+            {
+                ServerResponse = response
+            });
         }
 
         private void OnEmailComplete(MimeMessage message)
@@ -149,10 +152,13 @@ namespace Edi.TemplateEmail.NetStd
             {
                 using (var smtp = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    smtp.MessageSent += (sender, args) => { OnEmailSent(messageToSend); };
+                    smtp.MessageSent += (sender, args) =>
+                    {
+                        OnEmailSent(messageToSend, args.Response);
+                    };
 
                     smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await smtp.ConnectAsync(Settings.SmtpServer, Settings.SmtpServerPort, 
+                    await smtp.ConnectAsync(Settings.SmtpServer, Settings.SmtpServerPort,
                         Settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
                     if (!string.IsNullOrEmpty(Settings.SmtpUserName))
                     {
