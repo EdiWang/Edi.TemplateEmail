@@ -2,18 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2019.1.1</Version>
+    <Version>2019.1.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>.NET Standard 2.0 implementation for Edi.TemplateEmail</Description>
+    <Description>Write email template in xml and send email via smtp</Description>
     <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
     <Copyright>(c) 2019 edi.wang</Copyright>
-    <PackageProjectUrl>http://edi.wang</PackageProjectUrl>
+    <PackageProjectUrl>https://edi.wang</PackageProjectUrl>
     <PackageTags>Email</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-    <AssemblyVersion>2019.1.1.0</AssemblyVersion>
-    <FileVersion>2019.1.1.0</FileVersion>
+    <AssemblyVersion>2019.1.2.0</AssemblyVersion>
+    <FileVersion>2019.1.2.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Company>edi.wang</Company>
+    <Authors>Edi Wang</Authors>
   </PropertyGroup>
 
   <ItemGroup>
