@@ -13,7 +13,7 @@ using MimeKit.Text;
 
 namespace Edi.TemplateEmail.NetStd
 {
-    public class EmailHelper
+    public class EmailHelper : IEmailHelper
     {
         #region Events
 
