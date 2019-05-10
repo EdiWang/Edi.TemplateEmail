@@ -5,6 +5,11 @@ This library enable you to configure email in XML template and send the email in
 
 [![Build status](https://dev.azure.com/ediwang/EdiWang-GitHub-Builds/_apis/build/status/Edi.TemplateEmail-CI)](https://dev.azure.com/ediwang/EdiWang-GitHub-Builds/_build/latest?definitionId=-1)
 
+[![NuGet][main-nuget-badge]][main-nuget]
+
+[main-nuget]: https://www.nuget.org/packages/Edi.TemplatedEmail.NetStd/
+[main-nuget-badge]: https://img.shields.io/nuget/v/Edi.TemplatedEmail.NetStd.svg?style=flat-square&label=nuget
+
 ## For .NET Core
 
 Notice: .NET Core support is done via .NET Standard 2.0, it can support .NET Framework, but not recommended for this package yet.
