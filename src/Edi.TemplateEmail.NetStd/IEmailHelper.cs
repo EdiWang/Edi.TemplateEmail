@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public interface IEmailHelper
     {

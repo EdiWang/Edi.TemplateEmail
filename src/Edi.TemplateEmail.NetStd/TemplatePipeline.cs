@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public class TemplatePipeline
     {

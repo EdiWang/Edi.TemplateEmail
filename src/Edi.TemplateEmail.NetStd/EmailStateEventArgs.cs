@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public class EmailStateEventArgs : EventArgs
     {

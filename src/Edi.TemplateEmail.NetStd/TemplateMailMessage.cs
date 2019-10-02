@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using Edi.TemplateEmail.NetStd.Models;
+using Edi.TemplateEmail.Models;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public class TemplateMailMessage
     {

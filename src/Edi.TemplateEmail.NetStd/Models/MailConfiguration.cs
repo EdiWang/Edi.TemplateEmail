@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Edi.TemplateEmail.NetStd.Models
+namespace Edi.TemplateEmail.Models
 {
     /// <summary>
     /// Represents the root mail configuration node

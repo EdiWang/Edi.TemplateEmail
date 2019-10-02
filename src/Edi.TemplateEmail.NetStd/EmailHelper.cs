@@ -6,12 +6,12 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Edi.TemplateEmail.NetStd.Models;
+using Edi.TemplateEmail.Models;
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public class EmailHelper : IEmailHelper
     {

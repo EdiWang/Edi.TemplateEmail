@@ -1,5 +1,4 @@
-﻿using Edi.TemplateEmail.NetStd;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 

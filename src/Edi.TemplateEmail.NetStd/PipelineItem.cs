@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Edi.TemplateEmail.NetStd
+namespace Edi.TemplateEmail
 {
     public class PipelineItem
     {

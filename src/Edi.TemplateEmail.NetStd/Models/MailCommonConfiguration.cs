@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Edi.TemplateEmail.NetStd.Models
+namespace Edi.TemplateEmail.Models
 {
     /// <summary>
     /// Represents the common configuration node

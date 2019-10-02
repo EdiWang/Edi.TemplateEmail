@@ -1,4 +1,4 @@
-﻿namespace Edi.TemplateEmail.NetStd
+﻿namespace Edi.TemplateEmail
 {
     public class EmailSettings
     {
