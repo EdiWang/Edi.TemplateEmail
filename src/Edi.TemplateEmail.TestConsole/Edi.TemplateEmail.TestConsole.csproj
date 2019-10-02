@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Edi.TemplateEmail.NetStd\Edi.TemplateEmail.csproj" />
+    <ProjectReference Include="..\Edi.TemplateEmail\Edi.TemplateEmail.csproj" />
   </ItemGroup>
 
 </Project>
