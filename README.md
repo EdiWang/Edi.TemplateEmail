@@ -1,7 +1,7 @@
 Edi.TemplateEmail
 ===============================
 
-This library enable you to configure email in XML template and send the email in your .NET / .NET Core applications.
+This library enable you to configure email in XML template and send the email in your .NET Core applications.
 
 [![Build status](https://dev.azure.com/ediwang/EdiWang-GitHub-Builds/_apis/build/status/Edi.TemplateEmail-CI)](https://dev.azure.com/ediwang/EdiWang-GitHub-Builds/_build/latest?definitionId=-1)
 
@@ -12,10 +12,8 @@ This library enable you to configure email in XML template and send the email in
 
 ## For .NET Core
 
-Notice: .NET Core support is done via .NET Standard 2.0, it can support .NET Framework, but not recommended for this package yet.
-
 ```
-PM > Install-Package Edi.TemplateEmail.NetStd
+dotnet add package Edi.TemplateEmail
 ```
 
 ### Step 1: Sample mailConfiguration.xml under your application root
