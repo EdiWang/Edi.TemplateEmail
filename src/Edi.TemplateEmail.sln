@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edi.TemplateEmail.NetStd", "Edi.TemplateEmail.NetStd\Edi.TemplateEmail.NetStd.csproj", "{5E2EC6D7-ED69-4F15-928D-5E1E315B4099}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edi.TemplateEmail.NetStd.TestConsole", "Edi.TemplateEmail.NetStd.TestConsole\Edi.TemplateEmail.NetStd.TestConsole.csproj", "{D1005BBF-3B8D-440D-B5DF-28B937038860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edi.TemplateEmail.TestConsole", "Edi.TemplateEmail.NetStd.TestConsole\Edi.TemplateEmail.TestConsole.csproj", "{D1005BBF-3B8D-440D-B5DF-28B937038860}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{927EAD03-0E2F-4D83-88C9-9F1585A12B06}"
 EndProject

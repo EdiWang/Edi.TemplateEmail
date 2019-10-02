@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Edi.TemplateEmail.NetStd;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Edi.TemplateEmail.NetStd.TestConsole
+namespace Edi.TemplateEmail.TestConsole
 {
     class Program
     {
