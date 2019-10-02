@@ -7,8 +7,8 @@ This library enable you to configure email in XML template and send the email in
 
 [![NuGet][main-nuget-badge]][main-nuget]
 
-[main-nuget]: https://www.nuget.org/packages/Edi.TemplateEmail.NetStd/
-[main-nuget-badge]: https://img.shields.io/nuget/v/Edi.TemplateEmail.NetStd.svg?style=flat-square&label=nuget
+[main-nuget]: https://www.nuget.org/packages/Edi.TemplateEmail/
+[main-nuget-badge]: https://img.shields.io/nuget/v/Edi.TemplateEmail.svg?style=flat-square&label=nuget
 
 ## For .NET Core
 
