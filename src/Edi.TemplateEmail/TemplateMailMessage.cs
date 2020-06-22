@@ -12,7 +12,7 @@ namespace Edi.TemplateEmail
 
         public string Subject { get; set; }
 
-        public bool Loaded { get; private set; }
+        public bool Loaded { get; }
 
         public TemplateMailMessage(MailConfiguration mailConfig, string messageType)
         {

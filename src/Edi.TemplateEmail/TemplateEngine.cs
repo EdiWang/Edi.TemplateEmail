@@ -8,9 +8,9 @@ namespace Edi.TemplateEmail
     {
         private const string FormatPattern = @"{(?<Entity>\w+).(?<Property>\w+)";
 
-        public TemplatePipeline Pipeline { get; private set; }
+        public TemplatePipeline Pipeline { get; }
 
-        public TemplateMailMessage TextProvider { get; private set; }
+        public TemplateMailMessage TextProvider { get; }
 
         public TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
         {

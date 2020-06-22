@@ -69,10 +69,8 @@ namespace Edi.TemplateEmail
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
             var serializer = new XmlSerializer(typeof(MailConfiguration));
-            using (var fileStream = new FileStream(configSource, FileMode.Open))
-            {
-                _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
-            }
+            using var fileStream = new FileStream(configSource, FileMode.Open);
+            _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
         }
 
         public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline)
@@ -105,14 +103,12 @@ namespace Edi.TemplateEmail
                 throw new ArgumentNullException(nameof(toAddress));
             }
 
-            switch (CurrentEngine)
+            CurrentEngine = CurrentEngine switch
             {
-                case null when templateEngine == null:
-                    throw new Exception("TemplateEngine must be specified.");
-                case null when true:
-                    CurrentEngine = templateEngine;
-                    break;
-            }
+                null when templateEngine == null => throw new Exception("TemplateEngine must be specified."),
+                null when true => templateEngine,
+                _ => CurrentEngine
+            };
 
             // create mail message
             var messageToSend = new MimeMessage
@@ -122,7 +118,7 @@ namespace Edi.TemplateEmail
             };
             messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpUserName));
             var bodyText = CurrentEngine.Format(() => new StringBuilder(CurrentEngine.TextProvider.Text)).Trim();
-            if (CurrentEngine.TextProvider is TemplateMailMessage templateMailMessage && templateMailMessage.IsHtml)
+            if (CurrentEngine.TextProvider is { } templateMailMessage && templateMailMessage.IsHtml)
             {
                 messageToSend.Body = new TextPart(TextFormat.Html) { Text = bodyText };
             }
@@ -133,41 +129,39 @@ namespace Edi.TemplateEmail
 
             if (_mailConfiguration.CommonConfiguration.OverrideToAddress)
             {
-                messageToSend.To.Add(new MailboxAddress(_mailConfiguration.CommonConfiguration.ToAddress));
+                messageToSend.To.Add(MailboxAddress.Parse(_mailConfiguration.CommonConfiguration.ToAddress));
             }
             else
             {
-                foreach (var add in enumerable)
+                foreach (string add in enumerable)
                 {
-                    messageToSend.To.Add(new MailboxAddress(add));
+                    messageToSend.To.Add(MailboxAddress.Parse(add));
                 }
             }
 
             if (!string.IsNullOrEmpty(ccAddress))
             {
-                messageToSend.Cc.Add(new MailboxAddress(ccAddress));
+                messageToSend.Cc.Add(MailboxAddress.Parse(ccAddress));
             }
 
             try
             {
-                using (var smtp = new MailKit.Net.Smtp.SmtpClient())
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+                smtp.MessageSent += (sender, args) =>
                 {
-                    smtp.MessageSent += (sender, args) =>
-                    {
-                        OnEmailSent(messageToSend, args.Response);
-                    };
+                    OnEmailSent(messageToSend, args.Response);
+                };
 
-                    smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await smtp.ConnectAsync(Settings.SmtpServer, Settings.SmtpServerPort,
-                        Settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
-                    if (!string.IsNullOrEmpty(Settings.SmtpUserName))
-                    {
-                        await smtp.AuthenticateAsync(Settings.SmtpUserName, Settings.SmtpPassword);
-                    }
-
-                    await smtp.SendAsync(messageToSend);
-                    await smtp.DisconnectAsync(true);
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                await smtp.ConnectAsync(Settings.SmtpServer, Settings.SmtpServerPort,
+                    Settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+                if (!string.IsNullOrEmpty(Settings.SmtpUserName))
+                {
+                    await smtp.AuthenticateAsync(Settings.SmtpUserName, Settings.SmtpPassword);
                 }
+
+                await smtp.SendAsync(messageToSend);
+                await smtp.DisconnectAsync(true);
             }
             catch (SmtpException)
             {
