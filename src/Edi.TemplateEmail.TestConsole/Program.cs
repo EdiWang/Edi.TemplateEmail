@@ -14,6 +14,7 @@ namespace Edi.TemplateEmail.TestConsole
 
             if (EmailHelper == null)
             {
+                // Change these settings
                 var settings = new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "", 587)
                 {
                     EnableSsl = true,
@@ -39,7 +40,9 @@ namespace Edi.TemplateEmail.TestConsole
             try
             {
                 Console.WriteLine("Sending Email...");
-                await TestSendTestMail();
+                
+                // Change the TO address here
+                await TestSendTestMail("Edi.Wang@outlook.com");
             }
             catch (Exception e)
             {
@@ -49,7 +52,7 @@ namespace Edi.TemplateEmail.TestConsole
             Console.ReadLine();
         }
 
-        public static async Task TestSendTestMail()
+        public static async Task TestSendTestMail(string toAddress)
         {
             var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
@@ -58,7 +61,7 @@ namespace Edi.TemplateEmail.TestConsole
                 .Map("EmailDisplayName", EmailHelper.Settings.EmailDisplayName)
                 .Map("EnableSsl", EmailHelper.Settings.EnableSsl);
 
-            await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
+            await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync(toAddress);
         }
     }
 }
