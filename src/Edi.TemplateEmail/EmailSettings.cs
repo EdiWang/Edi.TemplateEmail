@@ -10,7 +10,7 @@
 
         public int SmtpServerPort { get; }
 
-        public bool EnableSsl { get; set; }
+        public bool EnableTls { get; set; }
 
         public string EmailDisplayName { get; set; }
 

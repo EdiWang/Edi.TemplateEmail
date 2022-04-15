@@ -6,43 +6,47 @@ namespace Edi.TemplateEmail.TestConsole;
 
 class Program
 {
-    public static EmailHelper EmailHelper { get; set; }
-
     static async Task Main(string[] args)
     {
+        // Change these values
+        var smtpServer = "smtp-mail.outlook.com";
+        var userName = "Edi.Test@outlook.com";
+        var password = "";
+        var port = 587;
+        var toAddress = "Edi.Wang@outlook.com";
+
         var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
+        var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, port)
+             .WithTls()
+             .WithSenderName("Test Sender")
+             .WithDisplayName("Edi.TemplateEmail.NetStd");
 
-        if (EmailHelper == null)
+        emailHelper.EmailSent += (sender, eventArgs) =>
         {
-            // Change these settings
-            var settings = new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "", 587)
-            {
-                EnableSsl = true,
-                EmailDisplayName = "Edi.TemplateEmail.NetStd",
-                SenderName = "Test Sender"
-            };
-
-            EmailHelper = new EmailHelper(configSource, settings);
-            EmailHelper.EmailSent += (sender, eventArgs) =>
-            {
-                Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
-            };
-            EmailHelper.EmailFailed += (sender, eventArgs) =>
-            {
-                Console.WriteLine("Failed");
-            };
-            EmailHelper.EmailCompleted += (sender, e) =>
-            {
-                Console.WriteLine("Completed.");
-            };
-        }
+            Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
+        };
+        emailHelper.EmailFailed += (sender, eventArgs) =>
+        {
+            Console.WriteLine("Failed");
+        };
+        emailHelper.EmailCompleted += (sender, e) =>
+        {
+            Console.WriteLine("Completed.");
+        };
 
         try
         {
             Console.WriteLine("Sending Email...");
-                
-            // Change the TO address here
-            await TestSendTestMail("Edi.Wang@outlook.com");
+
+            var pipeline = new TemplatePipeline()
+                .Map("MachineName", Environment.MachineName)
+                .Map("SmtpServer", emailHelper.Settings.SmtpServer)
+                .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
+                .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
+                .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
+                .Map("EnableTls", emailHelper.Settings.EnableTls);
+
+            await emailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync(toAddress);
         }
         catch (Exception e)
         {
@@ -50,17 +54,5 @@ class Program
         }
 
         Console.ReadLine();
-    }
-
-    public static async Task TestSendTestMail(string toAddress)
-    {
-        var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
-            .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
-            .Map("SmtpServerPort", EmailHelper.Settings.SmtpServerPort)
-            .Map("SmtpUserName", EmailHelper.Settings.SmtpUserName)
-            .Map("EmailDisplayName", EmailHelper.Settings.EmailDisplayName)
-            .Map("EnableSsl", EmailHelper.Settings.EnableSsl);
-
-        await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync(toAddress);
     }
 }

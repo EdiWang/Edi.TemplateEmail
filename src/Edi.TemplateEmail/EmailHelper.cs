@@ -59,18 +59,36 @@ namespace Edi.TemplateEmail
 
         private readonly MailConfiguration _mailConfiguration;
 
-        public EmailHelper(string configSource, EmailSettings settings)
+        public EmailHelper(string configSource, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
         {
             if (string.IsNullOrWhiteSpace(configSource))
             {
                 throw new ArgumentNullException(nameof(configSource));
             }
 
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            Settings = new EmailSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
 
             var serializer = new XmlSerializer(typeof(MailConfiguration));
             using var fileStream = new FileStream(configSource, FileMode.Open);
             _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
+        }
+
+        public EmailHelper WithTls()
+        {
+            Settings.EnableTls = true;
+            return this;
+        }
+
+        public EmailHelper WithSenderName(string name)
+        {
+            Settings.SenderName = name;
+            return this;
+        }
+
+        public EmailHelper WithDisplayName(string displayName)
+        {
+            Settings.EmailDisplayName = displayName;
+            return this;
         }
 
         public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline)
@@ -153,8 +171,10 @@ namespace Edi.TemplateEmail
                 };
 
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                await smtp.ConnectAsync(Settings.SmtpServer, Settings.SmtpServerPort,
-                    Settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+                await smtp.ConnectAsync(
+                    Settings.SmtpServer, 
+                    Settings.SmtpServerPort,
+                    Settings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
                 if (!string.IsNullOrEmpty(Settings.SmtpUserName))
                 {
                     await smtp.AuthenticateAsync(Settings.SmtpUserName, Settings.SmtpPassword);

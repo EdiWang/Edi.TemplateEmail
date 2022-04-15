@@ -7,7 +7,7 @@ namespace Edi.TemplateEmail
         /// <summary>
         /// The internal pipeline
         /// </summary>
-        readonly Dictionary<string, object> _pipeline = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _pipeline = new Dictionary<string, object>();
 
         /// <summary>
         /// Adds the specified obj by name to the pipeline.
