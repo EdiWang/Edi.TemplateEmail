@@ -10,11 +10,14 @@ namespace Edi.TemplateEmail
         event EmailHelper.EmailCompletedEventHandler EmailCompleted;
         EmailSettings Settings { get; }
         TemplateEngine CurrentEngine { get; }
-        EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline);
 
+        public EmailHelper WithTls();
+        public EmailHelper WithSenderName(string name);
+        public EmailHelper WithDisplayName(string displayName);
+
+        EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline);
         Task SendMailAsync(string toAddress,
             TemplateEngine templateEngine = null, string ccAddress = null);
-
         Task SendMailAsync(IEnumerable<string> toAddress,
             TemplateEngine templateEngine = null, string ccAddress = null);
     }
