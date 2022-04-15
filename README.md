@@ -42,43 +42,34 @@ Optional: You may need to set it to copy to output directory based on your usage
 
 ### Step 2:
 
-Define an EmailHelper object in your class.
-```
-public static EmailHelper EmailHelper { get; set; }
-```
-
-Get the configuration file path
-
-```
-var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.config";
-```
-
 Initialize the EmailHelper by your mail server settings
 
 ```
-var settings = new EmailSettings("smtp-mail.outlook.com", "Edi.Test@outlook.com", "YOURPASSWORD", 587)
-{
-    EnableSsl = true,
-    EmailDisplayName = "Edi.TemplateEmail.NetStd",
-    SenderName = "Test Sender"
-};
+var smtpServer = "smtp-mail.outlook.com";
+var userName = "Edi.Test@outlook.com";
+var password = "";
+var port = 587;
+var toAddress = "Edi.Wang@outlook.com";
 
-EmailHelper = new EmailHelper(configSource, settings);
+var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
+var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, port)
+     .WithTls()
+     .WithSenderName("Test Sender")
+     .WithDisplayName("Edi.TemplateEmail.NetStd");
 ```
 
-Optional: You can also define event handlers on this
+You can also add event handlers
 
 ```
-EmailHelper.EmailSent += (sender, eventArgs) =>
+emailHelper.EmailSent += (sender, eventArgs) =>
 {
-    if (sender is MailMessage msg)
-        Console.WriteLine($"Email {msg.Subject} is sent, Success: {eventArgs.IsSuccess}");
+    Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
 };
-EmailHelper.EmailFailed += (sender, eventArgs) =>
+emailHelper.EmailFailed += (sender, eventArgs) =>
 {
     Console.WriteLine("Failed");
 };
-EmailHelper.EmailCompleted += (sender, e) =>
+emailHelper.EmailCompleted += (sender, e) =>
 {
     Console.WriteLine("Completed.");
 };
@@ -87,22 +78,13 @@ EmailHelper.EmailCompleted += (sender, e) =>
 ### Step 3: Map the Configuration Values and Send Email
 
 ```
-public static async Task TestSendTestMail()
-{
-    bool isOk = true;
+var pipeline = new TemplatePipeline()
+    .Map("MachineName", Environment.MachineName)
+    .Map("SmtpServer", emailHelper.Settings.SmtpServer)
+    .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
+    .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
+    .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
+    .Map("EnableTls", emailHelper.Settings.EnableTls);
 
-    var pipeline = new TemplatePipeline().Map("MachineName", Environment.MachineName)
-        .Map("SmtpServer", EmailHelper.Settings.SmtpServer)
-        .Map("SmtpServerPort", EmailHelper.Settings.SmtpServerPort)
-        .Map("SmtpUserName", EmailHelper.Settings.SmtpUserName)
-        .Map("EmailDisplayName", EmailHelper.Settings.EmailDisplayName)
-        .Map("EnableSsl", EmailHelper.Settings.EnableSsl);
-
-    EmailHelper.EmailFailed += (s, e) =>
-    {
-        isOk = false;
-    };
-
-    await EmailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync("Edi.Wang@outlook.com");
-}
+await emailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync(toAddress);
 ```
