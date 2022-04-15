@@ -1,58 +1,41 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Edi.TemplateEmail;
 
-namespace Edi.TemplateEmail.TestConsole;
+// Change these values
+var smtpServer = "smtp-mail.outlook.com";
+var userName = "Edi.Test@outlook.com";
+var password = "";
+var port = 587;
+var toAddress = "Edi.Wang@outlook.com";
 
-class Program
+var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
+var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, port)
+     .WithTls()
+     .WithSenderName("Test Sender")
+     .WithDisplayName("Edi.TemplateEmail.TestConsole");
+
+emailHelper.EmailSent += (sender, eventArgs) =>
 {
-    static async Task Main(string[] args)
-    {
-        // Change these values
-        var smtpServer = "smtp-mail.outlook.com";
-        var userName = "Edi.Test@outlook.com";
-        var password = "";
-        var port = 587;
-        var toAddress = "Edi.Wang@outlook.com";
+    Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
+};
+emailHelper.EmailFailed += (sender, eventArgs) => Console.WriteLine("Failed");
+emailHelper.EmailCompleted += (sender, e) => Console.WriteLine("Completed.");
 
-        var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
-        var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, port)
-             .WithTls()
-             .WithSenderName("Test Sender")
-             .WithDisplayName("Edi.TemplateEmail.NetStd");
+try
+{
+    Console.WriteLine("Sending Email...");
 
-        emailHelper.EmailSent += (sender, eventArgs) =>
-        {
-            Console.WriteLine($"Email is sent, Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
-        };
-        emailHelper.EmailFailed += (sender, eventArgs) =>
-        {
-            Console.WriteLine("Failed");
-        };
-        emailHelper.EmailCompleted += (sender, e) =>
-        {
-            Console.WriteLine("Completed.");
-        };
-
-        try
-        {
-            Console.WriteLine("Sending Email...");
-
-            var pipeline = new TemplatePipeline()
-                .Map("MachineName", Environment.MachineName)
-                .Map("SmtpServer", emailHelper.Settings.SmtpServer)
-                .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
-                .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
-                .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-                .Map("EnableTls", emailHelper.Settings.EnableTls);
-
-            await emailHelper.ApplyTemplate("TestMail", pipeline).SendMailAsync(toAddress);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-
-        Console.ReadLine();
-    }
+    await emailHelper.ForType("TestMail")
+                     .Map("MachineName", Environment.MachineName)
+                     .Map("SmtpServer", emailHelper.Settings.SmtpServer)
+                     .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
+                     .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
+                     .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
+                     .Map("EnableTls", emailHelper.Settings.EnableTls)
+                     .SendAsync(toAddress);
 }
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
+
+Console.ReadLine();

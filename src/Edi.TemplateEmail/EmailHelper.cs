@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Edi.TemplateEmail.Models;
+using MailKit.Security;
+using MimeKit;
+using MimeKit.Text;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,28 +10,20 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Edi.TemplateEmail.Models;
-using MailKit.Security;
-using MimeKit;
-using MimeKit.Text;
 
 namespace Edi.TemplateEmail
 {
+    public delegate void EmailCompletedEventHandler(object sender, EmailStateEventArgs e);
+    public delegate void EmailSentEventHandler(object sender, EmailStateEventArgs e);
+    public delegate void EmailFailedEventHandler(object sender, EmailStateEventArgs e);
+
     public class EmailHelper : IEmailHelper
     {
         #region Events
 
         public event EmailFailedEventHandler EmailFailed;
-
-        public delegate void EmailFailedEventHandler(object sender, EmailStateEventArgs e);
-
         public event EmailSentEventHandler EmailSent;
-
-        public delegate void EmailSentEventHandler(object sender, EmailStateEventArgs e);
-
         public event EmailCompletedEventHandler EmailCompleted;
-
-        public delegate void EmailCompletedEventHandler(object sender, EmailStateEventArgs e);
 
         private void OnEmailFailed(MimeMessage message)
         {
@@ -51,26 +47,59 @@ namespace Edi.TemplateEmail
 
         #region Properties
 
-        public EmailSettings Settings { get; }
+        public EmailSettings Settings { get; private set; }
 
         public TemplateEngine CurrentEngine { get; private set; }
 
+        public TemplatePipeline Pipeline { get; private set; }
+
         #endregion
 
-        private readonly MailConfiguration _mailConfiguration;
+        private MailConfiguration _mailConfiguration;
+        private string _mailType;
 
-        public EmailHelper(string configSource, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+        public EmailHelper() { }
+
+        public EmailHelper(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
         {
-            if (string.IsNullOrWhiteSpace(configSource))
+            WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+        }
+
+        public EmailHelper(MailConfiguration configuration, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+        {
+            WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+            WithConfig(configuration);
+        }
+
+        public EmailHelper(string configPath, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+        {
+            WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+            WithConfig(configPath);
+        }
+
+        public EmailHelper WithSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+        {
+            Settings = new EmailSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+            return this;
+        }
+
+        public EmailHelper WithConfig(string configPath)
+        {
+            if (string.IsNullOrWhiteSpace(configPath))
             {
-                throw new ArgumentNullException(nameof(configSource));
+                throw new ArgumentNullException(nameof(configPath));
             }
 
-            Settings = new EmailSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
-
             var serializer = new XmlSerializer(typeof(MailConfiguration));
-            using var fileStream = new FileStream(configSource, FileMode.Open);
-            _mailConfiguration = ((MailConfiguration)serializer.Deserialize(fileStream));
+            using var fileStream = new FileStream(configPath, FileMode.Open);
+            _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
+            return this;
+        }
+
+        public EmailHelper WithConfig(MailConfiguration configuration)
+        {
+            _mailConfiguration = configuration;
+            return this;
         }
 
         public EmailHelper WithTls()
@@ -91,42 +120,42 @@ namespace Edi.TemplateEmail
             return this;
         }
 
-        public EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline)
+        public EmailHelper ForType(string mailType)
         {
-            var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, mailType);
-            if (messageToPersonalize.Loaded)
-            {
-                var engine = new TemplateEngine(messageToPersonalize, pipeline);
-                CurrentEngine = engine;
-            }
+            _mailType = mailType;
+            Pipeline = new TemplatePipeline();
             return this;
         }
 
-        public async Task SendMailAsync(string toAddress,
-            TemplateEngine templateEngine = null, string ccAddress = null)
+        public EmailHelper Map(string name, object value)
+        {
+            Pipeline.Map(name, value);
+            return this;
+        }
+
+        public async Task SendAsync(string toAddress, string ccAddress = null)
         {
             if (string.IsNullOrWhiteSpace(toAddress))
             {
                 throw new ArgumentNullException(nameof(toAddress));
             }
-            await SendMailAsync(new[] { toAddress }, templateEngine, ccAddress);
+            await SendAsync(new[] { toAddress }, ccAddress);
         }
 
-        public async Task SendMailAsync(IEnumerable<string> toAddress,
-            TemplateEngine templateEngine = null, string ccAddress = null)
+        public async Task SendAsync(IEnumerable<string> toAddress, string ccAddress = null)
         {
+            var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, _mailType);
+            if (messageToPersonalize.Loaded)
+            {
+                var engine = new TemplateEngine(messageToPersonalize, Pipeline);
+                CurrentEngine = engine;
+            }
+
             var enumerable = toAddress as string[] ?? toAddress.ToArray();
             if (!enumerable.Any())
             {
                 throw new ArgumentNullException(nameof(toAddress));
             }
-
-            CurrentEngine = CurrentEngine switch
-            {
-                null when templateEngine == null => throw new Exception("TemplateEngine must be specified."),
-                null when true => templateEngine,
-                _ => CurrentEngine
-            };
 
             // create mail message
             var messageToSend = new MimeMessage
@@ -172,7 +201,7 @@ namespace Edi.TemplateEmail
 
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 await smtp.ConnectAsync(
-                    Settings.SmtpServer, 
+                    Settings.SmtpServer,
                     Settings.SmtpServerPort,
                     Settings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
                 if (!string.IsNullOrEmpty(Settings.SmtpUserName))

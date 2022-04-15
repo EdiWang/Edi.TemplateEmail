@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Edi.TemplateEmail.Models;
+using System;
 using System.Globalization;
-using Edi.TemplateEmail.Models;
 
 namespace Edi.TemplateEmail
 {
@@ -22,7 +22,7 @@ namespace Edi.TemplateEmail
 
             // Load all the mail message templates that 
             // match the message type
-            var possibleMails = mailConfig.MailMessages.FindAll(mail => 
+            var possibleMails = mailConfig.MailMessages.FindAll(mail =>
                 string.CompareOrdinal(mail.MessageType, messageType) == 0);
             if (possibleMails.Count == 0) return;
 

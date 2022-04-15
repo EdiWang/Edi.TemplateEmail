@@ -5,20 +5,21 @@ namespace Edi.TemplateEmail
 {
     public interface IEmailHelper
     {
-        event EmailHelper.EmailFailedEventHandler EmailFailed;
-        event EmailHelper.EmailSentEventHandler EmailSent;
-        event EmailHelper.EmailCompletedEventHandler EmailCompleted;
+        event EmailFailedEventHandler EmailFailed;
+        event EmailSentEventHandler EmailSent;
+        event EmailCompletedEventHandler EmailCompleted;
+
         EmailSettings Settings { get; }
         TemplateEngine CurrentEngine { get; }
 
+        public EmailHelper WithSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort);
+        public EmailHelper WithConfig(string configPath);
         public EmailHelper WithTls();
         public EmailHelper WithSenderName(string name);
         public EmailHelper WithDisplayName(string displayName);
-
-        EmailHelper ApplyTemplate(string mailType, TemplatePipeline pipeline);
-        Task SendMailAsync(string toAddress,
-            TemplateEngine templateEngine = null, string ccAddress = null);
-        Task SendMailAsync(IEnumerable<string> toAddress,
-            TemplateEngine templateEngine = null, string ccAddress = null);
+        public EmailHelper ForType(string mailType);
+        public EmailHelper Map(string name, object value);
+        public Task SendAsync(string toAddress, string ccAddress = null);
+        public Task SendAsync(IEnumerable<string> toAddress, string ccAddress = null);
     }
 }
