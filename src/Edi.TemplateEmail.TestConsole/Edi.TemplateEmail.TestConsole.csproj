@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Edi.TemplateEmail\Edi.TemplateEmail.csproj" />
+    <PackageReference Include="Spectre.Console" Version="0.45.0" />
   </ItemGroup>
 
 </Project>
