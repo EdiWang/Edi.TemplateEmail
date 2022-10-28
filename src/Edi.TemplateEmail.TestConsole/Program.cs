@@ -20,7 +20,7 @@ var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, 
 
 emailHelper.EmailSent += (sender, eventArgs) =>
 {
-    AnsiConsole.MarkupLine($"Email is sent. Success: [blue]{eventArgs.IsSuccess}[/], Response: [blue]{eventArgs.ServerResponse}[/]");
+    Console.WriteLine($"Email is sent. Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
 };
 emailHelper.EmailFailed += (sender, eventArgs) => AnsiConsole.MarkupLine("[red]Failed[/]");
 emailHelper.EmailCompleted += (sender, e) => AnsiConsole.WriteLine("Completed.");
