@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <Version>2022.4.3</Version>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <Version>2022.5.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Write email template in xml and send email via smtp</Description>
     <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
@@ -11,8 +11,8 @@
     <PackageTags>Email</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-    <AssemblyVersion>2022.4.3</AssemblyVersion>
-    <FileVersion>2022.4.3</FileVersion>
+    <AssemblyVersion>2022.5.0</AssemblyVersion>
+    <FileVersion>2022.5.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>edi.wang</Company>
     <Authors>Edi Wang</Authors>
