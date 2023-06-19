@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-    <Version>2023.2.1</Version>
+    <Version>2023.2.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Write email template in xml and send email via smtp</Description>
     <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
@@ -11,8 +11,8 @@
     <PackageTags>Email</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-    <AssemblyVersion>2023.2.1</AssemblyVersion>
-    <FileVersion>2023.2.1</FileVersion>
+    <AssemblyVersion>2023.2.2</AssemblyVersion>
+    <FileVersion>2023.2.2</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>edi.wang</Company>
     <Authors>Edi Wang</Authors>
