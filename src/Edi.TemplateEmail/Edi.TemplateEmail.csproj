@@ -1,26 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <Version>2023.3.1</Version>
+        <AssemblyName>Edi.TemplateEmail</AssemblyName>
+        <RootNamespace>Edi.TemplateEmail</RootNamespace>
+        <IsTestProject>false</IsTestProject>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Company>edi.wang</Company>
+        <Product>TemplateEmail</Product>
+        <Authors>Edi Wang</Authors>
+        <Description>Write email template in xml and send email via smtp</Description>
+        <PackageId>Edi.TemplateEmail</PackageId>
+        <PackageTags>Email</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://edi.wang</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-        <Version>2023.3.0</Version>
         <AssemblyVersion>2023.3.0</AssemblyVersion>
         <FileVersion>2023.3.0</FileVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Description>Write email template in xml and send email via smtp</Description>
-        <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
         <Copyright>(c) 2023 edi.wang@outlook.com</Copyright>
-        <PackageProjectUrl>https://edi.wang</PackageProjectUrl>
-        <PackageTags>Email</PackageTags>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Company>edi.wang</Company>
-        <Authors>Edi Wang</Authors>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="MailKit" Version="4.2.0" />
     </ItemGroup>
-
 </Project>
