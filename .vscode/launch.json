@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Edi.TemplateEmail.TestConsole/bin/Debug/net7.0/Edi.TemplateEmail.TestConsole.dll",
+            "program": "${workspaceFolder}/src/Edi.TemplateEmail.TestConsole/bin/Debug/net8.0/Edi.TemplateEmail.TestConsole.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/Edi.TemplateEmail.TestConsole",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

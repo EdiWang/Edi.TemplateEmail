@@ -1,10 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-        <Version>2023.3.0</Version>
-        <AssemblyVersion>2023.3.0</AssemblyVersion>
-        <FileVersion>2023.3.0</FileVersion>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+        <Version>2023.4.0</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>Write email template in xml and send email via smtp</Description>
         <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
@@ -17,10 +15,17 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Company>edi.wang</Company>
         <Authors>Edi Wang</Authors>
+        <PackageIcon>edi-logo-blue.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="MailKit" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\img\edi-logo-blue.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
