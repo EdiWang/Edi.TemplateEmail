@@ -4,19 +4,13 @@ using System.Text.RegularExpressions;
 
 namespace Edi.TemplateEmail;
 
-public class TemplateEngine
+public class TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
 {
     private const string FormatPattern = @"{(?<Entity>\w+).(?<Property>\w+)";
 
-    public TemplatePipeline Pipeline { get; }
+    public TemplatePipeline Pipeline { get; } = pipeline;
 
-    public TemplateMailMessage TextProvider { get; }
-
-    public TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
-    {
-        TextProvider = provider;
-        Pipeline = pipeline;
-    }
+    public TemplateMailMessage TextProvider { get; } = provider;
 
     public string Format(Func<StringBuilder> textSelector)
     {
