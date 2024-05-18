@@ -3,7 +3,7 @@ Edi.TemplateEmail
 
 This library enable you to configure email in XML template and send the email in your .NET Core applications.
 
-![.NET Core](https://github.com/EdiWang/Edi.TemplateEmail/workflows/.NET%20Core/badge.svg)
+![.NET](https://github.com/EdiWang/Edi.TemplateEmail/workflows/.NET%20Core/badge.svg)
 
 [![NuGet][main-nuget-badge]][main-nuget]
 
