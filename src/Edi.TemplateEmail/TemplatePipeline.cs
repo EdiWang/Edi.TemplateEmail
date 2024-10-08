@@ -7,7 +7,7 @@ public class TemplatePipeline
     /// <summary>
     /// The internal pipeline
     /// </summary>
-    private readonly Dictionary<string, object> _pipeline = new Dictionary<string, object>();
+    private readonly Dictionary<string, object> _pipeline = new();
 
     /// <summary>
     /// Adds the specified obj by name to the pipeline.
@@ -37,5 +37,5 @@ public class TemplatePipeline
         return _pipeline.ContainsKey(entityName);
     }
 
-    public PipelineItem this[string name] => new PipelineItem { Name = name, Value = _pipeline[name] };
+    public PipelineItem this[string name] => new() { Name = name, Value = _pipeline[name] };
 }

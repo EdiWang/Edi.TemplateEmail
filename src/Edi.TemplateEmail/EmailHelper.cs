@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -27,12 +26,12 @@ public class EmailHelper : IEmailHelper
 
     private void OnEmailFailed(MimeMessage message)
     {
-        EmailFailed?.Invoke(message, new EmailStateEventArgs(false, null));
+        EmailFailed?.Invoke(message, new(false, null));
     }
 
     private void OnEmailSent(MimeMessage message, string response)
     {
-        EmailSent?.Invoke(message, new EmailStateEventArgs(true, null)
+        EmailSent?.Invoke(message, new(true, null)
         {
             ServerResponse = response
         });
@@ -40,7 +39,7 @@ public class EmailHelper : IEmailHelper
 
     private void OnEmailComplete(MimeMessage message)
     {
-        EmailCompleted?.Invoke(message, new EmailStateEventArgs(true, null));
+        EmailCompleted?.Invoke(message, new(true, null));
     }
 
     #endregion Events
@@ -79,7 +78,7 @@ public class EmailHelper : IEmailHelper
 
     public EmailHelper WithSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
     {
-        Settings = new EmailSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+        Settings = new(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
         return this;
     }
 
@@ -123,7 +122,7 @@ public class EmailHelper : IEmailHelper
     public EmailHelper ForType(string mailType)
     {
         _mailType = mailType;
-        Pipeline = new TemplatePipeline();
+        Pipeline = new();
         return this;
     }
 
@@ -160,19 +159,14 @@ public class EmailHelper : IEmailHelper
         // create mail message
         var messageToSend = new MimeMessage
         {
-            Sender = new MailboxAddress(Settings.SenderName, Settings.SmtpUserName),
-            Subject = CurrentEngine.Format(() => new StringBuilder(CurrentEngine.TextProvider.Subject)).Trim(),
+            Sender = new(Settings.SenderName, Settings.SmtpUserName),
+            Subject = CurrentEngine.Format(() => new(CurrentEngine.TextProvider.Subject)).Trim(),
         };
         messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpUserName));
-        var bodyText = CurrentEngine.Format(() => new StringBuilder(CurrentEngine.TextProvider.Text)).Trim();
-        if (CurrentEngine.TextProvider is { } templateMailMessage && templateMailMessage.IsHtml)
-        {
-            messageToSend.Body = new TextPart(TextFormat.Html) { Text = bodyText };
-        }
-        else
-        {
-            messageToSend.Body = new TextPart(TextFormat.Plain) { Text = bodyText };
-        }
+        var bodyText = CurrentEngine.Format(() => new(CurrentEngine.TextProvider.Text)).Trim();
+        messageToSend.Body = CurrentEngine.TextProvider is { IsHtml: true }
+            ? new(TextFormat.Html) { Text = bodyText }
+            : new TextPart(TextFormat.Plain) { Text = bodyText };
 
         if (_mailConfiguration.CommonConfiguration.OverrideToAddress)
         {

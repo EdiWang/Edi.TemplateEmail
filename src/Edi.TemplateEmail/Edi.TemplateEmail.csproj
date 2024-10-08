@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>2024.2.0</Version>
+    <Version>2024.2.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>edi.wang</Company>
     <Authors>Edi Wang</Authors>
@@ -17,7 +17,7 @@
     <PackageIcon>edi-logo-blue.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.7.1.1" />
+    <PackageReference Include="MailKit" Version="4.8.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
