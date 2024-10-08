@@ -1,26 +1,18 @@
 ﻿namespace Edi.TemplateEmail;
 
-public class EmailSettings
+public class EmailSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
 {
-    public string SmtpServer { get; }
+    public string SmtpServer { get; } = smtpServer;
 
-    public string SmtpUserName { get; }
+    public string SmtpUserName { get; } = smtpUserName;
 
-    public string SmtpPassword { get; }
+    public string SmtpPassword { get; } = smtpPassword;
 
-    public int SmtpServerPort { get; }
+    public int SmtpServerPort { get; } = smtpServerPort;
 
     public bool EnableTls { get; set; }
 
     public string EmailDisplayName { get; set; }
 
     public string SenderName { get; set; }
-
-    public EmailSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
-    {
-        SmtpServer = smtpServer;
-        SmtpUserName = smtpUserName;
-        SmtpPassword = smtpPassword;
-        SmtpServerPort = smtpServerPort;
-    }
 }
