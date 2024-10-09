@@ -13,7 +13,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Copyright>(c) 2024 edi.wang@outlook.com</Copyright>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <PackageIcon>edi-logo-blue.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
