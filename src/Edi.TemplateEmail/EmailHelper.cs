@@ -188,12 +188,12 @@ public class EmailHelper : IEmailHelper
         try
         {
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.MessageSent += (sender, args) =>
+            smtp.MessageSent += (_, args) =>
             {
                 OnEmailSent(messageToSend, args.Response);
             };
 
-            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+            smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
             await smtp.ConnectAsync(
                 Settings.SmtpServer,
                 Settings.SmtpServerPort,
