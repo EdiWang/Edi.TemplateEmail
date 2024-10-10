@@ -13,7 +13,7 @@ public class EmailHelper : IEmailHelper
 {
     public EmailSettings Settings { get; }
 
-    public TemplateEngine CurrentEngine { get; private set; }
+    public TemplateEngine Engine { get; private set; }
 
     public TemplatePipeline Pipeline { get; private set; }
 
@@ -59,7 +59,7 @@ public class EmailHelper : IEmailHelper
         if (messageToPersonalize.Loaded)
         {
             var engine = new TemplateEngine(messageToPersonalize, Pipeline);
-            CurrentEngine = engine;
+            Engine = engine;
         }
 
         var enumerable = toAddress as string[] ?? toAddress.ToArray();
@@ -72,11 +72,11 @@ public class EmailHelper : IEmailHelper
         var messageToSend = new MimeMessage
         {
             Sender = new(Settings.SenderName, Settings.SmtpUserName),
-            Subject = CurrentEngine.Format(() => new(CurrentEngine.TextProvider.Subject)).Trim(),
+            Subject = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim(),
         };
         messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpUserName));
-        var bodyText = CurrentEngine.Format(() => new(CurrentEngine.TextProvider.Text)).Trim();
-        messageToSend.Body = CurrentEngine.TextProvider is { IsHtml: true }
+        var bodyText = Engine.Format(() => new(Engine.TextProvider.Text)).Trim();
+        messageToSend.Body = Engine.TextProvider is { IsHtml: true }
             ? new(TextFormat.Html) { Text = bodyText }
             : new TextPart(TextFormat.Plain) { Text = bodyText };
 
