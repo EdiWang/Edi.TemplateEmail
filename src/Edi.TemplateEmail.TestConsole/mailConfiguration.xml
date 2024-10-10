@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0"?>
 <MailConfiguration>
-  <CommonConfiguration OverrideToAddress="false" ToAddress="overridetest@test.com" />
-  <MailMessage MessageType="TestMail" IsHtml="true">
-    <MessageSubject>Test Mail on {MachineName.Value}</MessageSubject>
-    <MessageBody>
-      <![CDATA[
+    <MailMessage MessageType="TestMail" IsHtml="true">
+        <MessageSubject>Test Mail on {MachineName.Value}</MessageSubject>
+        <MessageBody>
+            <![CDATA[
 Mail configuration on {MachineName.Value} is good: <br />
 Smtp Server: {SmtpServer.Value}<br />
 Smtp Port: {SmtpServerPort.Value}<br />
@@ -12,6 +11,6 @@ Smtp Username: {SmtpUserName.Value}<br />
 Email Display Name: {EmailDisplayName.Value}<br />
 Enable TLS: {EnableTls.Value}<br />
       ]]>
-    </MessageBody>
-  </MailMessage>
+        </MessageBody>
+    </MailMessage>
 </MailConfiguration>

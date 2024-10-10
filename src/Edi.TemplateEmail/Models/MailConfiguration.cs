@@ -10,7 +10,4 @@ public class MailConfiguration
 {
     [XmlElement("MailMessage")]
     public List<MailMessageConfiguration> MailMessages { get; set; }
-
-    [XmlElement]
-    public MailCommonConfiguration CommonConfiguration { get; set; }
 }

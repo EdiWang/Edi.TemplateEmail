@@ -60,37 +60,36 @@ public class EmailHelper : IEmailHelper
 
         LoadEngine();
 
-        // create mail message
+        var subjectText = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim();
+        var bodyText = Engine.Format(() => new(Engine.TextProvider.Text)).Trim();
+
+        var cm = new CommonMailMessage
+        {
+            Subject = subjectText,
+            Body = bodyText,
+            Receipts = receipts,
+            CcReceipts = ccReceipts
+        };
+
         var messageToSend = new MimeMessage
         {
             Sender = new(Settings.SenderName, Settings.SmtpSettings.SmtpUserName),
         };
 
         messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpSettings.SmtpUserName));
-
-        var subjectText = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim();
-        messageToSend.Subject = subjectText;
-
-        var bodyText = Engine.Format(() => new(Engine.TextProvider.Text)).Trim();
+        messageToSend.Subject = cm.Subject;
         messageToSend.Body = Engine.TextProvider is { IsHtml: true }
-            ? new(TextFormat.Html) { Text = bodyText }
-            : new TextPart(TextFormat.Plain) { Text = bodyText };
+            ? new(TextFormat.Html) { Text = cm.Body }
+            : new TextPart(TextFormat.Plain) { Text = cm.Body };
 
-        if (_mailConfiguration.CommonConfiguration.OverrideToAddress)
+        foreach (var address in cm.Receipts)
         {
-            messageToSend.To.Add(MailboxAddress.Parse(_mailConfiguration.CommonConfiguration.ToAddress));
-        }
-        else
-        {
-            foreach (var address in receipts)
-            {
-                messageToSend.To.Add(MailboxAddress.Parse(address));
-            }
+            messageToSend.To.Add(MailboxAddress.Parse(address));
         }
 
-        if (ccReceipts is { Length: > 0 })
+        if (cm.CcReceipts is { Length: > 0 })
         {
-            foreach (var ccReceipt in ccReceipts)
+            foreach (var ccReceipt in cm.CcReceipts)
             {
                 messageToSend.Cc.Add(MailboxAddress.Parse(ccReceipt));
             }
