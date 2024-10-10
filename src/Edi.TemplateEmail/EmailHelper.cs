@@ -54,36 +54,19 @@ public class EmailHelper : IEmailHelper
 
     #endregion
 
-    private MailConfiguration _mailConfiguration;
+    private readonly MailConfiguration _mailConfiguration;
     private string _mailType;
 
-    public EmailHelper() { }
-
-    public EmailHelper(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+    public EmailHelper(MailConfiguration configuration, EmailSettings settings)
     {
-        WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
+        Settings = settings;
+        _mailConfiguration = configuration;
     }
 
-    public EmailHelper(MailConfiguration configuration, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
+    public EmailHelper(string configPath, EmailSettings settings)
     {
-        WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
-        WithConfig(configuration);
-    }
+        Settings = settings;
 
-    public EmailHelper(string configPath, string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
-    {
-        WithSettings(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
-        WithConfig(configPath);
-    }
-
-    public EmailHelper WithSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort)
-    {
-        Settings = new(smtpServer, smtpUserName, smtpPassword, smtpServerPort);
-        return this;
-    }
-
-    public EmailHelper WithConfig(string configPath)
-    {
         if (string.IsNullOrWhiteSpace(configPath))
         {
             throw new ArgumentNullException(nameof(configPath));
@@ -92,19 +75,6 @@ public class EmailHelper : IEmailHelper
         var serializer = new XmlSerializer(typeof(MailConfiguration));
         using var fileStream = new FileStream(configPath, FileMode.Open);
         _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
-        return this;
-    }
-
-    public EmailHelper WithConfig(MailConfiguration configuration)
-    {
-        _mailConfiguration = configuration;
-        return this;
-    }
-
-    public EmailHelper WithTls()
-    {
-        Settings.EnableTls = true;
-        return this;
     }
 
     public EmailHelper WithSenderName(string name)

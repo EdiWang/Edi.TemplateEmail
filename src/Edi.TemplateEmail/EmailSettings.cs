@@ -10,7 +10,7 @@ public class EmailSettings(string smtpServer, string smtpUserName, string smtpPa
 
     public int SmtpServerPort { get; } = smtpServerPort;
 
-    public bool EnableTls { get; set; }
+    public bool EnableTls { get; set; } = true;
 
     public string EmailDisplayName { get; set; }
 

@@ -12,9 +12,6 @@ public interface IEmailHelper
     EmailSettings Settings { get; }
     TemplateEngine CurrentEngine { get; }
 
-    public EmailHelper WithSettings(string smtpServer, string smtpUserName, string smtpPassword, int smtpServerPort);
-    public EmailHelper WithConfig(string configPath);
-    public EmailHelper WithTls();
     public EmailHelper WithSenderName(string name);
     public EmailHelper WithDisplayName(string displayName);
     public EmailHelper ForType(string mailType);

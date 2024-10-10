@@ -13,8 +13,7 @@ var senderName = AnsiConsole.Ask<string>("Sender name: ");
 var displayName = AnsiConsole.Ask<string>("Sender display name: ");
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
-var emailHelper = new EmailHelper(configSource, smtpServer, userName, password, port)
-     .WithTls()
+var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, password, port))
      .WithSenderName(senderName)
      .WithDisplayName(displayName);
 
