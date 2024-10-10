@@ -19,29 +19,23 @@ var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, passwo
     EmailDisplayName = displayName
 });
 
-await AnsiConsole.Status()
-    .Spinner(Spinner.Known.Dots)
-    .StartAsync($"Sending email...", async _ =>
-    {
-        try
-        {
-            var message = emailHelper.ForType("TestMail")
-                .Map("MachineName", Environment.MachineName)
-                .Map("SmtpServer", emailHelper.Settings.SmtpServer)
-                .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
-                .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
-                .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-                .Map("EnableTls", emailHelper.Settings.EnableTls)
-                .BuildMessage([toAddress]);
+try
+{
+    var message = emailHelper.ForType("TestMail")
+        .Map("MachineName", Environment.MachineName)
+        .Map("SmtpServer", emailHelper.Settings.SmtpServer)
+        .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
+        .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
+        .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
+        .Map("EnableTls", emailHelper.Settings.EnableTls)
+        .BuildMessage([toAddress]);
 
-            var result = await message.SendAsync();
-            Console.WriteLine($"Email is sent. Response: {result}");
-        }
-        catch (Exception e)
-        {
-            AnsiConsole.WriteException(e);
-        }
-    });
-
+    var result = await message.SendAsync();
+    Console.WriteLine($"Email is sent. Response: {result}");
+}
+catch (Exception e)
+{
+    AnsiConsole.WriteException(e);
+}
 
 Console.ReadLine();
