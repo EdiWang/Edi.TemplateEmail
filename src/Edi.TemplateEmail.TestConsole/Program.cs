@@ -4,45 +4,44 @@ using System.Text;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-var smtpServer = AnsiConsole.Ask<string>("SMTP server (e.g. smtp-mail.outlook.com): ");
+var smtpServer = AnsiConsole.Ask<string>("SMTP server (e.g. smtp.example.com): ");
 var userName = AnsiConsole.Ask<string>("SMTP user name: ");
 var password = AnsiConsole.Prompt(new TextPrompt<string>("SMTP password:").Secret());
-var port = AnsiConsole.Ask<int>("Port number (e.g. 587): ");
+var port = AnsiConsole.Ask<int>("Port number (e.g. 25): ");
 var toAddress = AnsiConsole.Ask<string>("To email address: ");
 var senderName = AnsiConsole.Ask<string>("Sender name: ");
 var displayName = AnsiConsole.Ask<string>("Sender display name: ");
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
-var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, password, port))
-     .WithSenderName(senderName)
-     .WithDisplayName(displayName);
-
-emailHelper.EmailSent += (sender, eventArgs) =>
+var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, password, port)
 {
-    Console.WriteLine($"Email is sent. Success: {eventArgs.IsSuccess}, Response: {eventArgs.ServerResponse}");
-};
-emailHelper.EmailFailed += (sender, eventArgs) => AnsiConsole.MarkupLine("[red]Failed[/]");
-emailHelper.EmailCompleted += (sender, e) => AnsiConsole.WriteLine("Completed.");
+    SenderName = senderName,
+    EmailDisplayName = displayName
+});
 
-try
-{
-    await AnsiConsole.Status()
-        .Spinner(Spinner.Known.Dots)
-        .StartAsync($"Sending email...", async _ =>
+await AnsiConsole.Status()
+    .Spinner(Spinner.Known.Dots)
+    .StartAsync($"Sending email...", async _ =>
+    {
+        try
         {
-            await emailHelper.ForType("TestMail")
+            var message = emailHelper.ForType("TestMail")
                 .Map("MachineName", Environment.MachineName)
                 .Map("SmtpServer", emailHelper.Settings.SmtpServer)
                 .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
                 .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
                 .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
                 .Map("EnableTls", emailHelper.Settings.EnableTls)
-                .SendAsync(toAddress);
-        });
-}
-catch (Exception e)
-{
-    AnsiConsole.WriteException(e);
-}
+                .BuildMessage([toAddress]);
+
+            var result = await message.SendAsync();
+            Console.WriteLine($"Email is sent. Response: {result}");
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.WriteException(e);
+        }
+    });
+
 
 Console.ReadLine();

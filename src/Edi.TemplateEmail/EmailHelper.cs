@@ -1,58 +1,21 @@
 ﻿using Edi.TemplateEmail.Models;
-using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Edi.TemplateEmail;
 
-public delegate void EmailCompletedEventHandler(object sender, EmailStateEventArgs e);
-public delegate void EmailSentEventHandler(object sender, EmailStateEventArgs e);
-public delegate void EmailFailedEventHandler(object sender, EmailStateEventArgs e);
-
 public class EmailHelper : IEmailHelper
 {
-    #region Events
-
-    public event EmailFailedEventHandler EmailFailed;
-    public event EmailSentEventHandler EmailSent;
-    public event EmailCompletedEventHandler EmailCompleted;
-
-    private void OnEmailFailed(MimeMessage message)
-    {
-        EmailFailed?.Invoke(message, new(false, null));
-    }
-
-    private void OnEmailSent(MimeMessage message, string response)
-    {
-        EmailSent?.Invoke(message, new(true, null)
-        {
-            ServerResponse = response
-        });
-    }
-
-    private void OnEmailComplete(MimeMessage message)
-    {
-        EmailCompleted?.Invoke(message, new(true, null));
-    }
-
-    #endregion Events
-
-    #region Properties
-
-    public EmailSettings Settings { get; private set; }
+    public EmailSettings Settings { get; }
 
     public TemplateEngine CurrentEngine { get; private set; }
 
     public TemplatePipeline Pipeline { get; private set; }
-
-    #endregion
 
     private readonly MailConfiguration _mailConfiguration;
     private string _mailType;
@@ -77,18 +40,6 @@ public class EmailHelper : IEmailHelper
         _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
     }
 
-    public EmailHelper WithSenderName(string name)
-    {
-        Settings.SenderName = name;
-        return this;
-    }
-
-    public EmailHelper WithDisplayName(string displayName)
-    {
-        Settings.EmailDisplayName = displayName;
-        return this;
-    }
-
     public EmailHelper ForType(string mailType)
     {
         _mailType = mailType;
@@ -102,16 +53,7 @@ public class EmailHelper : IEmailHelper
         return this;
     }
 
-    public async Task SendAsync(string toAddress, string ccAddress = null)
-    {
-        if (string.IsNullOrWhiteSpace(toAddress))
-        {
-            throw new ArgumentNullException(nameof(toAddress));
-        }
-        await SendAsync(new[] { toAddress }, ccAddress);
-    }
-
-    public async Task SendAsync(IEnumerable<string> toAddress, string ccAddress = null)
+    public MimeMessageWithSettings BuildMessage(IEnumerable<string> toAddress, string ccAddress = null)
     {
         var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, _mailType);
         if (messageToPersonalize.Loaded)
@@ -155,35 +97,10 @@ public class EmailHelper : IEmailHelper
             messageToSend.Cc.Add(MailboxAddress.Parse(ccAddress));
         }
 
-        try
+        return new MimeMessageWithSettings
         {
-            using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.MessageSent += (_, args) =>
-            {
-                OnEmailSent(messageToSend, args.Response);
-            };
-
-            smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
-            await smtp.ConnectAsync(
-                Settings.SmtpServer,
-                Settings.SmtpServerPort,
-                Settings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
-            if (!string.IsNullOrEmpty(Settings.SmtpUserName))
-            {
-                await smtp.AuthenticateAsync(Settings.SmtpUserName, Settings.SmtpPassword);
-            }
-
-            await smtp.SendAsync(messageToSend);
-            await smtp.DisconnectAsync(true);
-        }
-        catch (SmtpException)
-        {
-            OnEmailFailed(messageToSend);
-            throw;
-        }
-        finally
-        {
-            OnEmailComplete(messageToSend);
-        }
+            MimeMessage = messageToSend,
+            Settings = Settings
+        };
     }
 }
