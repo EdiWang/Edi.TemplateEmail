@@ -2,9 +2,7 @@
 using MimeKit;
 using MimeKit.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Serialization;
 
 namespace Edi.TemplateEmail;
@@ -53,28 +51,26 @@ public class EmailHelper : IEmailHelper
         return this;
     }
 
-    public MimeMessageWithSettings BuildMessage(IEnumerable<string> toAddress, string ccAddress = null)
+    public MimeMessageWithSettings BuildMessage(string[] receipts, string[] ccReceipts = null)
     {
-        var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, _mailType);
-        if (messageToPersonalize.Loaded)
+        if (null == receipts || receipts.Length == 0)
         {
-            var engine = new TemplateEngine(messageToPersonalize, Pipeline);
-            Engine = engine;
+            throw new ArgumentNullException(nameof(receipts));
         }
 
-        var enumerable = toAddress as string[] ?? toAddress.ToArray();
-        if (!enumerable.Any())
-        {
-            throw new ArgumentNullException(nameof(toAddress));
-        }
+        LoadEngine();
 
         // create mail message
         var messageToSend = new MimeMessage
         {
-            Sender = new(Settings.SenderName, Settings.SmtpUserName),
-            Subject = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim(),
+            Sender = new(Settings.SenderName, Settings.SmtpSettings.SmtpUserName),
         };
-        messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpUserName));
+
+        messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpSettings.SmtpUserName));
+
+        var subjectText = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim();
+        messageToSend.Subject = subjectText;
+
         var bodyText = Engine.Format(() => new(Engine.TextProvider.Text)).Trim();
         messageToSend.Body = Engine.TextProvider is { IsHtml: true }
             ? new(TextFormat.Html) { Text = bodyText }
@@ -86,15 +82,18 @@ public class EmailHelper : IEmailHelper
         }
         else
         {
-            foreach (string add in enumerable)
+            foreach (var address in receipts)
             {
-                messageToSend.To.Add(MailboxAddress.Parse(add));
+                messageToSend.To.Add(MailboxAddress.Parse(address));
             }
         }
 
-        if (!string.IsNullOrEmpty(ccAddress))
+        if (ccReceipts is { Length: > 0 })
         {
-            messageToSend.Cc.Add(MailboxAddress.Parse(ccAddress));
+            foreach (var ccReceipt in ccReceipts)
+            {
+                messageToSend.Cc.Add(MailboxAddress.Parse(ccReceipt));
+            }
         }
 
         return new MimeMessageWithSettings
@@ -102,5 +101,15 @@ public class EmailHelper : IEmailHelper
             MimeMessage = messageToSend,
             Settings = Settings
         };
+    }
+
+    private void LoadEngine()
+    {
+        var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, _mailType);
+        if (messageToPersonalize.Loaded)
+        {
+            var engine = new TemplateEngine(messageToPersonalize, Pipeline);
+            Engine = engine;
+        }
     }
 }

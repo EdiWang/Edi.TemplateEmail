@@ -13,21 +13,25 @@ var senderName = AnsiConsole.Ask<string>("Sender name: ");
 var displayName = AnsiConsole.Ask<string>("Sender display name: ");
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
-var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, password, port)
+
+var settings = new EmailSettings
 {
     SenderName = senderName,
-    EmailDisplayName = displayName
-});
+    EmailDisplayName = displayName,
+    SmtpSettings = new(smtpServer, userName, password, port)
+};
+
+var emailHelper = new EmailHelper(configSource, settings);
 
 try
 {
     var message = emailHelper.ForType("TestMail")
         .Map("MachineName", Environment.MachineName)
-        .Map("SmtpServer", emailHelper.Settings.SmtpServer)
-        .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
-        .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
+        .Map("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer)
+        .Map("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort)
+        .Map("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName)
         .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-        .Map("EnableTls", emailHelper.Settings.EnableTls)
+        .Map("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
         .BuildMessage([toAddress]);
 
     var result = await message.SendAsync();

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Edi.TemplateEmail;
+﻿namespace Edi.TemplateEmail;
 
 public interface IEmailHelper
 {
@@ -9,5 +7,5 @@ public interface IEmailHelper
 
     public EmailHelper ForType(string mailType);
     public EmailHelper Map(string name, object value);
-    public MimeMessageWithSettings BuildMessage(IEnumerable<string> toAddress, string ccAddress = null);
+    public MimeMessageWithSettings BuildMessage(string[] receipts, string[] ccReceipts = null);
 }

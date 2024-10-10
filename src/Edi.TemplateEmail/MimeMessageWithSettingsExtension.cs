@@ -10,12 +10,12 @@ public static class MimeMessageWithSettingsExtension
         using var smtp = new MailKit.Net.Smtp.SmtpClient();
         smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
         await smtp.ConnectAsync(
-            messageToSend.Settings.SmtpServer,
-            messageToSend.Settings.SmtpServerPort,
-            messageToSend.Settings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
-        if (!string.IsNullOrEmpty(messageToSend.Settings.SmtpUserName))
+            messageToSend.Settings.SmtpSettings.SmtpServer,
+            messageToSend.Settings.SmtpSettings.SmtpServerPort,
+            messageToSend.Settings.SmtpSettings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+        if (!string.IsNullOrEmpty(messageToSend.Settings.SmtpSettings.SmtpUserName))
         {
-            await smtp.AuthenticateAsync(messageToSend.Settings.SmtpUserName, messageToSend.Settings.SmtpPassword);
+            await smtp.AuthenticateAsync(messageToSend.Settings.SmtpSettings.SmtpUserName, messageToSend.Settings.SmtpSettings.SmtpPassword);
         }
 
         var result = await smtp.SendAsync(messageToSend.MimeMessage);
