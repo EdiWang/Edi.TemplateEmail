@@ -1,6 +1,4 @@
 ﻿using Edi.TemplateEmail.Models;
-using MimeKit;
-using MimeKit.Text;
 using System;
 using System.IO;
 using System.Xml.Serialization;
@@ -51,7 +49,7 @@ public class EmailHelper : IEmailHelper
         return this;
     }
 
-    public MimeMessageWithSettings BuildMessage(string[] receipts, string[] ccReceipts = null)
+    public CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null)
     {
         if (null == receipts || receipts.Length == 0)
         {
@@ -68,38 +66,12 @@ public class EmailHelper : IEmailHelper
             Subject = subjectText,
             Body = bodyText,
             Receipts = receipts,
-            CcReceipts = ccReceipts
-        };
-
-        var messageToSend = new MimeMessage
-        {
-            Sender = new(Settings.SenderName, Settings.SmtpSettings.SmtpUserName),
-        };
-
-        messageToSend.From.Add(new MailboxAddress(Settings.EmailDisplayName, Settings.SmtpSettings.SmtpUserName));
-        messageToSend.Subject = cm.Subject;
-        messageToSend.Body = Engine.TextProvider is { IsHtml: true }
-            ? new(TextFormat.Html) { Text = cm.Body }
-            : new TextPart(TextFormat.Plain) { Text = cm.Body };
-
-        foreach (var address in cm.Receipts)
-        {
-            messageToSend.To.Add(MailboxAddress.Parse(address));
-        }
-
-        if (cm.CcReceipts is { Length: > 0 })
-        {
-            foreach (var ccReceipt in cm.CcReceipts)
-            {
-                messageToSend.Cc.Add(MailboxAddress.Parse(ccReceipt));
-            }
-        }
-
-        return new MimeMessageWithSettings
-        {
-            MimeMessage = messageToSend,
+            CcReceipts = ccReceipts,
+            BodyIsHtml = Engine.TextProvider.IsHtml,
             Settings = Settings
         };
+
+        return cm;
     }
 
     private void LoadEngine()
