@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Edi.TemplateEmail.Models;
+namespace Edi.TemplateEmail;
 
 public class MailMessageConfiguration
 {
