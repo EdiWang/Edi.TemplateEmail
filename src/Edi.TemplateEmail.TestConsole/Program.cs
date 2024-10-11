@@ -26,12 +26,20 @@ var emailHelper = new EmailHelper(configSource, settings);
 try
 {
     var message = emailHelper.ForType("TestMail")
-        .Map("MachineName", Environment.MachineName)
-        .Map("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer)
-        .Map("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort)
-        .Map("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName)
-        .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-        .Map("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
+        //.Map("MachineName", Environment.MachineName)
+        //.Map("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer)
+        //.Map("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort)
+        //.Map("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName)
+        //.Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
+        //.Map("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
+        .MapRange(
+            ("MachineName", Environment.MachineName),
+            ("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer),
+            ("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort),
+            ("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName),
+            ("EmailDisplayName", emailHelper.Settings.EmailDisplayName),
+            ("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
+        )
         .BuildMessage([toAddress]);
 
     var result = await message.SendAsync();

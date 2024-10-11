@@ -48,6 +48,16 @@ public class EmailHelper : IEmailHelper
         return this;
     }
 
+    public EmailHelper MapRange(params (string name, object value)[] values)
+    {
+        foreach (var (name, value) in values)
+        {
+            Pipeline.Map(name, value);
+        }
+
+        return this;
+    }
+
     public CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null)
     {
         if (null == receipts || receipts.Length == 0)

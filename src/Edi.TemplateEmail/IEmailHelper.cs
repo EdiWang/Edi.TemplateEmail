@@ -7,5 +7,6 @@ public interface IEmailHelper
 
     public EmailHelper ForType(string mailType);
     public EmailHelper Map(string name, object value);
+    public EmailHelper MapRange(params (string name, object value)[] values);
     public CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null);
 }
