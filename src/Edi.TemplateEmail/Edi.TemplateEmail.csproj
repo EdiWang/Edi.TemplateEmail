@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <Version>2024.6.0</Version>
+    <Version>2025.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>edi.wang</Company>
     <Authors>Edi Wang</Authors>
@@ -11,12 +11,12 @@
     <PackageProjectUrl>https://edi.wang</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Copyright>(c) 2024 edi.wang@outlook.com</Copyright>
+    <Copyright>(c) 2025 edi.wang@outlook.com</Copyright>
     <SignAssembly>true</SignAssembly>
     <PackageIcon>edi-logo-blue.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.8.0" />
+    <PackageReference Include="MailKit" Version="4.9.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
