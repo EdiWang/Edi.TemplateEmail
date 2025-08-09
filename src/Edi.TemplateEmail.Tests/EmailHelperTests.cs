@@ -25,8 +25,8 @@ public class EmailHelperTests
 
         _testMailConfiguration = new MailConfiguration
         {
-            MailMessages = new List<MailMessageConfiguration>
-            {
+            MailMessages =
+            [
                 new MailMessageConfiguration
                 {
                     MessageType = "TestMail",
@@ -34,7 +34,7 @@ public class EmailHelperTests
                     MessageSubject = "Test Subject: {MachineName.Value}",
                     MessageBody = "Test Body: {MachineName.Value} - {SmtpServer.Value}"
                 }
-            }
+            ]
         };
 
         // Create a temporary XML config file for testing
@@ -78,35 +78,31 @@ public class EmailHelperTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void Constructor_WithNullConfigPath_ShouldThrowArgumentNullException()
     {
         // Act
-        new EmailHelper((string)null, _testSettings);
+        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper((string)null, _testSettings));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void Constructor_WithEmptyConfigPath_ShouldThrowArgumentNullException()
     {
         // Act
-        new EmailHelper(string.Empty, _testSettings);
+        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper(string.Empty, _testSettings));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void Constructor_WithWhitespaceConfigPath_ShouldThrowArgumentNullException()
     {
         // Act
-        new EmailHelper("   ", _testSettings);
+        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper("   ", _testSettings));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(FileNotFoundException))]
     public void Constructor_WithNonExistentConfigPath_ShouldThrowFileNotFoundException()
     {
         // Act
-        new EmailHelper("nonexistent.xml", _testSettings);
+        Assert.ThrowsExactly<FileNotFoundException>(() => new EmailHelper("nonexistent.xml", _testSettings));
     }
 
     [TestMethod]
@@ -230,7 +226,6 @@ public class EmailHelperTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void BuildMessage_WithNullReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
@@ -238,11 +233,10 @@ public class EmailHelperTests
         emailHelper.ForType("TestMail");
 
         // Act
-        emailHelper.BuildMessage(null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => emailHelper.BuildMessage(null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void BuildMessage_WithEmptyReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
@@ -250,7 +244,7 @@ public class EmailHelperTests
         emailHelper.ForType("TestMail");
 
         // Act
-        emailHelper.BuildMessage(new string[0]);
+        Assert.ThrowsExactly<ArgumentNullException>(() => emailHelper.BuildMessage(new string[0]));
     }
 
     [TestMethod]
@@ -303,8 +297,8 @@ public class EmailHelperTests
         // Arrange
         var configWithWhitespace = new MailConfiguration
         {
-            MailMessages = new List<MailMessageConfiguration>
-            {
+            MailMessages =
+            [
                 new MailMessageConfiguration
                 {
                     MessageType = "TestMail",
@@ -312,7 +306,7 @@ public class EmailHelperTests
                     MessageSubject = "  Test Subject  ",
                     MessageBody = "  Test Body  "
                 }
-            }
+            ]
         };
 
         var emailHelper = new EmailHelper(configWithWhitespace, _testSettings);
@@ -334,8 +328,8 @@ public class EmailHelperTests
         // Arrange
         var htmlConfig = new MailConfiguration
         {
-            MailMessages = new List<MailMessageConfiguration>
-            {
+            MailMessages =
+            [
                 new MailMessageConfiguration
                 {
                     MessageType = "HtmlMail",
@@ -343,13 +337,13 @@ public class EmailHelperTests
                     MessageSubject = "HTML Subject",
                     MessageBody = "<h1>HTML Body</h1>"
                 }
-            }
+            ]
         };
 
         var textConfig = new MailConfiguration
         {
-            MailMessages = new List<MailMessageConfiguration>
-            {
+            MailMessages =
+            [
                 new MailMessageConfiguration
                 {
                     MessageType = "TextMail",
@@ -357,7 +351,7 @@ public class EmailHelperTests
                     MessageSubject = "Text Subject",
                     MessageBody = "Text Body"
                 }
-            }
+            ]
         };
 
         var emailHelperHtml = new EmailHelper(htmlConfig, _testSettings);
