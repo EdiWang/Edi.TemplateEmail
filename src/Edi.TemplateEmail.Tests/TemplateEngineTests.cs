@@ -1,6 +1,4 @@
-using System;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Edi.TemplateEmail.Tests;
 
@@ -17,8 +15,8 @@ public class TemplateEngineTests
         // Create a mock mail configuration for testing
         var mailConfig = new MailConfiguration
         {
-            MailMessages = new List<MailMessageConfiguration>
-            {
+            MailMessages =
+            [
                 new MailMessageConfiguration
                 {
                     MessageType = "Test",
@@ -26,7 +24,7 @@ public class TemplateEngineTests
                     MessageSubject = "Test Subject",
                     MessageBody = "Test Body"
                 }
-            }
+            ]
         };
 
         _templateMailMessage = new TemplateMailMessage(mailConfig, "Test");
