@@ -1,14 +1,13 @@
 using System.Globalization;
+using Xunit;
 
 namespace Edi.TemplateEmail.Tests;
 
-[TestClass]
 public class TemplateMailMessageTests
 {
-    private MailConfiguration _testMailConfiguration;
+    private readonly MailConfiguration _testMailConfiguration;
 
-    [TestInitialize]
-    public void TestInitialize()
+    public TemplateMailMessageTests()
     {
         _testMailConfiguration = new MailConfiguration
         {
@@ -50,46 +49,46 @@ public class TemplateMailMessageTests
         };
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNullMailConfig_ShouldSetLoadedToFalse()
     {
         // Act
         var templateMail = new TemplateMailMessage(null, "Welcome");
 
         // Assert
-        Assert.IsFalse(templateMail.Loaded);
-        Assert.IsNull(templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsNull(templateMail.Subject);
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithValidMessageType_ShouldLoadCorrectMessage()
     {
         // Act
         var templateMail = new TemplateMailMessage(_testMailConfiguration, "Newsletter");
 
         // Assert
-        Assert.IsTrue(templateMail.Loaded);
-        Assert.AreEqual("Monthly Newsletter", templateMail.Subject);
-        Assert.AreEqual("<h2>Newsletter</h2><p>Here's what's new this month.</p>", templateMail.Text);
-        Assert.IsTrue(templateMail.IsHtml);
+        Assert.True(templateMail.Loaded);
+        Assert.Equal("Monthly Newsletter", templateMail.Subject);
+        Assert.Equal("<h2>Newsletter</h2><p>Here's what's new this month.</p>", templateMail.Text);
+        Assert.True(templateMail.IsHtml);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNonExistentMessageType_ShouldSetLoadedToFalse()
     {
         // Act
         var templateMail = new TemplateMailMessage(_testMailConfiguration, "NonExistent");
 
         // Assert
-        Assert.IsFalse(templateMail.Loaded);
-        Assert.IsNull(templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsNull(templateMail.Subject);
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithMatchingCulture_ShouldSelectCultureSpecificMessage()
     {
         // Arrange
@@ -102,10 +101,10 @@ public class TemplateMailMessageTests
             var templateMail = new TemplateMailMessage(_testMailConfiguration, "Welcome");
 
             // Assert
-            Assert.IsTrue(templateMail.Loaded);
-            Assert.AreEqual("Welcome to our service", templateMail.Subject);
-            Assert.AreEqual("<h1>Welcome!</h1><p>Thank you for joining us.</p>", templateMail.Text);
-            Assert.IsTrue(templateMail.IsHtml);
+            Assert.True(templateMail.Loaded);
+            Assert.Equal("Welcome to our service", templateMail.Subject);
+            Assert.Equal("<h1>Welcome!</h1><p>Thank you for joining us.</p>", templateMail.Text);
+            Assert.True(templateMail.IsHtml);
         }
         finally
         {
@@ -113,7 +112,7 @@ public class TemplateMailMessageTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNonMatchingCulture_ShouldSelectFirstMessage()
     {
         // Arrange
@@ -126,10 +125,10 @@ public class TemplateMailMessageTests
             var templateMail = new TemplateMailMessage(_testMailConfiguration, "Welcome");
 
             // Assert
-            Assert.IsTrue(templateMail.Loaded);
-            Assert.AreEqual("Welcome to our service", templateMail.Subject);
-            Assert.AreEqual("<h1>Welcome!</h1><p>Thank you for joining us.</p>", templateMail.Text);
-            Assert.IsTrue(templateMail.IsHtml);
+            Assert.True(templateMail.Loaded);
+            Assert.Equal("Welcome to our service", templateMail.Subject);
+            Assert.Equal("<h1>Welcome!</h1><p>Thank you for joining us.</p>", templateMail.Text);
+            Assert.True(templateMail.IsHtml);
         }
         finally
         {
@@ -137,7 +136,7 @@ public class TemplateMailMessageTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithFrenchCulture_ShouldSelectFrenchMessage()
     {
         // Arrange
@@ -150,10 +149,10 @@ public class TemplateMailMessageTests
             var templateMail = new TemplateMailMessage(_testMailConfiguration, "Welcome");
 
             // Assert
-            Assert.IsTrue(templateMail.Loaded);
-            Assert.AreEqual("Bienvenue ид notre service", templateMail.Subject);
-            Assert.AreEqual("Bienvenue! Merci de nous avoir rejoint.", templateMail.Text);
-            Assert.IsFalse(templateMail.IsHtml);
+            Assert.True(templateMail.Loaded);
+            Assert.Equal("Bienvenue ид notre service", templateMail.Subject);
+            Assert.Equal("Bienvenue! Merci de nous avoir rejoint.", templateMail.Text);
+            Assert.False(templateMail.IsHtml);
         }
         finally
         {
@@ -161,33 +160,33 @@ public class TemplateMailMessageTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithEmptyMessageType_ShouldSetLoadedToFalse()
     {
         // Act
         var templateMail = new TemplateMailMessage(_testMailConfiguration, "");
 
         // Assert
-        Assert.IsFalse(templateMail.Loaded);
-        Assert.IsNull(templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsNull(templateMail.Subject);
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNullMessageType_ShouldSetLoadedToFalse()
     {
         // Act
         var templateMail = new TemplateMailMessage(_testMailConfiguration, null);
 
         // Assert
-        Assert.IsFalse(templateMail.Loaded);
-        Assert.IsNull(templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsNull(templateMail.Subject);
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithEmptyMailMessages_ShouldSetLoadedToFalse()
     {
         // Arrange
@@ -200,13 +199,13 @@ public class TemplateMailMessageTests
         var templateMail = new TemplateMailMessage(emptyConfig, "Welcome");
 
         // Assert
-        Assert.IsFalse(templateMail.Loaded);
-        Assert.IsNull(templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsNull(templateMail.Subject);
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNullMailMessages_ShouldThrowException()
     {
         // Arrange
@@ -216,11 +215,11 @@ public class TemplateMailMessageTests
         };
 
         // Act & Assert
-        Assert.ThrowsExactly<NullReferenceException>(() => 
+        Assert.Throws<NullReferenceException>(() =>
             new TemplateMailMessage(configWithNullMessages, "Welcome"));
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithCaseInsensitiveCultureMatch_ShouldSelectCorrectMessage()
     {
         // Arrange
@@ -233,9 +232,9 @@ public class TemplateMailMessageTests
             var templateMail = new TemplateMailMessage(_testMailConfiguration, "Welcome");
 
             // Assert
-            Assert.IsTrue(templateMail.Loaded);
-            Assert.AreEqual("Welcome to our service", templateMail.Subject);
-            Assert.IsTrue(templateMail.IsHtml);
+            Assert.True(templateMail.Loaded);
+            Assert.Equal("Welcome to our service", templateMail.Subject);
+            Assert.True(templateMail.IsHtml);
         }
         finally
         {
@@ -243,20 +242,20 @@ public class TemplateMailMessageTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithMessageHavingNullOrEmptyCulture_ShouldStillBeSelectable()
     {
         // Act
         var templateMail = new TemplateMailMessage(_testMailConfiguration, "Notification");
 
         // Assert
-        Assert.IsTrue(templateMail.Loaded);
-        Assert.AreEqual("System Notification", templateMail.Subject);
-        Assert.AreEqual("This is a system notification.", templateMail.Text);
-        Assert.IsFalse(templateMail.IsHtml);
+        Assert.True(templateMail.Loaded);
+        Assert.Equal("System Notification", templateMail.Subject);
+        Assert.Equal("This is a system notification.", templateMail.Text);
+        Assert.False(templateMail.IsHtml);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithMultipleMessagesOfSameTypeAndNoCultureMatch_ShouldSelectFirst()
     {
         // Arrange
@@ -292,10 +291,10 @@ public class TemplateMailMessageTests
             var templateMail = new TemplateMailMessage(configWithMultiple, "Test");
 
             // Assert
-            Assert.IsTrue(templateMail.Loaded);
-            Assert.AreEqual("First Subject", templateMail.Subject);
-            Assert.AreEqual("First Body", templateMail.Text);
-            Assert.IsFalse(templateMail.IsHtml);
+            Assert.True(templateMail.Loaded);
+            Assert.Equal("First Subject", templateMail.Subject);
+            Assert.Equal("First Body", templateMail.Text);
+            Assert.False(templateMail.IsHtml);
         }
         finally
         {
@@ -303,20 +302,20 @@ public class TemplateMailMessageTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Properties_ShouldHaveCorrectGetters()
     {
         // Arrange
         var templateMail = new TemplateMailMessage(_testMailConfiguration, "Newsletter");
 
         // Act & Assert
-        Assert.IsNotNull(templateMail.Text);
-        Assert.IsNotNull(templateMail.Subject);
-        Assert.IsTrue(templateMail.IsHtml);
-        Assert.IsTrue(templateMail.Loaded);
+        Assert.NotNull(templateMail.Text);
+        Assert.NotNull(templateMail.Subject);
+        Assert.True(templateMail.IsHtml);
+        Assert.True(templateMail.Loaded);
     }
 
-    [TestMethod]
+    [Fact]
     public void Properties_ShouldAllowSetting()
     {
         // Arrange
@@ -330,9 +329,9 @@ public class TemplateMailMessageTests
         templateMail.IsHtml = false;
 
         // Assert
-        Assert.AreEqual(newText, templateMail.Text);
-        Assert.AreEqual(newSubject, templateMail.Subject);
-        Assert.IsFalse(templateMail.IsHtml);
-        Assert.IsTrue(templateMail.Loaded); // Loaded property should be read-only
+        Assert.Equal(newText, templateMail.Text);
+        Assert.Equal(newSubject, templateMail.Subject);
+        Assert.False(templateMail.IsHtml);
+        Assert.True(templateMail.Loaded); // Loaded property should be read-only
     }
 }

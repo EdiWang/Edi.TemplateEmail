@@ -1,16 +1,15 @@
 using System.Text;
+using Xunit;
 
 namespace Edi.TemplateEmail.Tests;
 
-[TestClass]
 public class TemplateEngineTests
 {
-    private TemplateMailMessage _templateMailMessage;
-    private TemplatePipeline _pipeline;
-    private TemplateEngine _templateEngine;
+    private readonly TemplateMailMessage _templateMailMessage;
+    private readonly TemplatePipeline _pipeline;
+    private readonly TemplateEngine _templateEngine;
 
-    [TestInitialize]
-    public void TestInitialize()
+    public TemplateEngineTests()
     {
         // Create a mock mail configuration for testing
         var mailConfig = new MailConfiguration
@@ -32,15 +31,15 @@ public class TemplateEngineTests
         _templateEngine = new TemplateEngine(_templateMailMessage, _pipeline);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_ShouldSetPropertiesCorrectly()
     {
         // Assert
-        Assert.AreSame(_pipeline, _templateEngine.Pipeline);
-        Assert.AreSame(_templateMailMessage, _templateEngine.TextProvider);
+        Assert.Same(_pipeline, _templateEngine.Pipeline);
+        Assert.Same(_templateMailMessage, _templateEngine.TextProvider);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithSimpleStringReplacement_ShouldReplaceCorrectly()
     {
         // Arrange
@@ -51,10 +50,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello John Doe!", result);
+        Assert.Equal("Hello John Doe!", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithObjectPropertyReplacement_ShouldReplaceCorrectly()
     {
         // Arrange
@@ -66,10 +65,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello John Doe!", result);
+        Assert.Equal("Hello John Doe!", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithMultipleEntities_ShouldReplaceAll()
     {
         // Arrange
@@ -83,10 +82,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Dear John, welcome to ACME Corp!", result);
+        Assert.Equal("Dear John, welcome to ACME Corp!", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNonExistentEntity_ShouldReplaceWithEmptyString()
     {
         // Arrange
@@ -96,10 +95,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello !", result);
+        Assert.Equal("Hello !", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNonExistentProperty_ShouldReplaceWithEmptyString()
     {
         // Arrange
@@ -111,10 +110,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello !", result);
+        Assert.Equal("Hello !", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNoTemplateTokens_ShouldReturnOriginalText()
     {
         // Arrange
@@ -124,10 +123,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual(template, result);
+        Assert.Equal(template, result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithEmptyString_ShouldReturnEmptyString()
     {
         // Arrange
@@ -137,10 +136,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("", result);
+        Assert.Equal("", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithSameTokenMultipleTimes_ShouldReplaceAllOccurrences()
     {
         // Arrange
@@ -151,10 +150,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("John said hello to John in the mirror.", result);
+        Assert.Equal("John said hello to John in the mirror.", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithComplexObject_ShouldReplaceCorrectly()
     {
         // Arrange
@@ -172,10 +171,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Name: John Doe, Email: john.doe@example.com, Age: 30", result);
+        Assert.Equal("Name: John Doe, Email: john.doe@example.com, Age: 30", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithMalformedTokens_ShouldNotReplace()
     {
         // Arrange
@@ -186,10 +185,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello {User Value} and {User.} and {.Value}!", result);
+        Assert.Equal("Hello {User Value} and {User.} and {.Value}!", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNestedBraces_ShouldOnlyReplaceValidTokens()
     {
         // Arrange
@@ -200,10 +199,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello {John} and John!", result);
+        Assert.Equal("Hello {John} and John!", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNumericProperties_ShouldConvertToString()
     {
         // Arrange
@@ -215,10 +214,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Count: 42, Average: 3.14", result);
+        Assert.Equal("Count: 42, Average: 3.14", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithBooleanProperties_ShouldConvertToString()
     {
         // Arrange
@@ -230,10 +229,10 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Enabled: True, Visible: False", result);
+        Assert.Equal("Enabled: True, Visible: False", result);
     }
 
-    [TestMethod]
+    [Fact]
     public void Format_WithNullPropertyValue_ShouldReplaceWithEmptyString()
     {
         // Arrange
@@ -245,7 +244,7 @@ public class TemplateEngineTests
         string result = _templateEngine.Format(() => new StringBuilder(template));
 
         // Assert
-        Assert.AreEqual("Hello John !", result);
+        Assert.Equal("Hello John !", result);
     }
 
     // Helper classes for testing
