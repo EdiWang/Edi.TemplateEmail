@@ -1,16 +1,15 @@
 using System.Xml.Serialization;
+using Xunit;
 
 namespace Edi.TemplateEmail.Tests;
 
-[TestClass]
-public class EmailHelperTests
+public class EmailHelperTests : IDisposable
 {
-    private EmailSettings _testSettings;
-    private MailConfiguration _testMailConfiguration;
-    private string _testConfigPath;
+    private readonly EmailSettings _testSettings;
+    private readonly MailConfiguration _testMailConfiguration;
+    private readonly string _testConfigPath;
 
-    [TestInitialize]
-    public void TestInitialize()
+    public EmailHelperTests()
     {
         _testSettings = new EmailSettings
         {
@@ -43,8 +42,7 @@ public class EmailHelperTests
         serializer.Serialize(fileStream, _testMailConfiguration);
     }
 
-    [TestCleanup]
-    public void TestCleanup()
+    public void Dispose()
     {
         if (File.Exists(_testConfigPath))
         {
@@ -52,59 +50,59 @@ public class EmailHelperTests
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithConfiguration_ShouldSetProperties()
     {
         // Act
         var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
 
         // Assert
-        Assert.AreEqual(_testSettings, emailHelper.Settings);
-        Assert.IsNull(emailHelper.Engine);
-        Assert.IsNull(emailHelper.Pipeline);
+        Assert.Equal(_testSettings, emailHelper.Settings);
+        Assert.Null(emailHelper.Engine);
+        Assert.Null(emailHelper.Pipeline);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithConfigPath_ShouldSetProperties()
     {
         // Act
         var emailHelper = new EmailHelper(_testConfigPath, _testSettings);
 
         // Assert
-        Assert.AreEqual(_testSettings, emailHelper.Settings);
-        Assert.IsNull(emailHelper.Engine);
-        Assert.IsNull(emailHelper.Pipeline);
+        Assert.Equal(_testSettings, emailHelper.Settings);
+        Assert.Null(emailHelper.Engine);
+        Assert.Null(emailHelper.Pipeline);
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNullConfigPath_ShouldThrowArgumentNullException()
     {
-        // Act
-        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper((string)null, _testSettings));
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper((string)null, _testSettings));
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithEmptyConfigPath_ShouldThrowArgumentNullException()
     {
-        // Act
-        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper(string.Empty, _testSettings));
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper(string.Empty, _testSettings));
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithWhitespaceConfigPath_ShouldThrowArgumentNullException()
     {
-        // Act
-        Assert.ThrowsExactly<ArgumentNullException>(() => new EmailHelper("   ", _testSettings));
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper("   ", _testSettings));
     }
 
-    [TestMethod]
+    [Fact]
     public void Constructor_WithNonExistentConfigPath_ShouldThrowFileNotFoundException()
     {
-        // Act
-        Assert.ThrowsExactly<FileNotFoundException>(() => new EmailHelper("nonexistent.xml", _testSettings));
+        // Act & Assert
+        Assert.Throws<FileNotFoundException>(() => new EmailHelper("nonexistent.xml", _testSettings));
     }
 
-    [TestMethod]
+    [Fact]
     public void ForType_ShouldSetMailTypeAndCreatePipeline()
     {
         // Arrange
@@ -115,11 +113,11 @@ public class EmailHelperTests
         var result = emailHelper.ForType(mailType);
 
         // Assert
-        Assert.AreSame(emailHelper, result); // Should return self for fluent interface
-        Assert.IsNotNull(emailHelper.Pipeline);
+        Assert.Same(emailHelper, result); // Should return self for fluent interface
+        Assert.NotNull(emailHelper.Pipeline);
     }
 
-    [TestMethod]
+    [Fact]
     public void Map_ShouldAddValueToPipeline()
     {
         // Arrange
@@ -132,12 +130,12 @@ public class EmailHelperTests
         var result = emailHelper.Map(name, value);
 
         // Assert
-        Assert.AreSame(emailHelper, result); // Should return self for fluent interface
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity(name));
-        Assert.AreEqual(value, emailHelper.Pipeline[name].Value);
+        Assert.Same(emailHelper, result); // Should return self for fluent interface
+        Assert.True(emailHelper.Pipeline.HasEntity(name));
+        Assert.Equal(value, emailHelper.Pipeline[name].Value);
     }
 
-    [TestMethod]
+    [Fact]
     public void MapRange_ShouldAddMultipleValuesToPipeline()
     {
         // Arrange
@@ -154,16 +152,16 @@ public class EmailHelperTests
         var result = emailHelper.MapRange(values);
 
         // Assert
-        Assert.AreSame(emailHelper, result); // Should return self for fluent interface
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("Name1"));
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("Name2"));
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("Name3"));
-        Assert.AreEqual("Value1", emailHelper.Pipeline["Name1"].Value);
-        Assert.AreEqual(42, emailHelper.Pipeline["Name2"].Value);
-        Assert.AreEqual(true, emailHelper.Pipeline["Name3"].Value);
+        Assert.Same(emailHelper, result); // Should return self for fluent interface
+        Assert.True(emailHelper.Pipeline.HasEntity("Name1"));
+        Assert.True(emailHelper.Pipeline.HasEntity("Name2"));
+        Assert.True(emailHelper.Pipeline.HasEntity("Name3"));
+        Assert.Equal("Value1", emailHelper.Pipeline["Name1"].Value);
+        Assert.Equal(42, emailHelper.Pipeline["Name2"].Value);
+        Assert.Equal(true, emailHelper.Pipeline["Name3"].Value);
     }
 
-    [TestMethod]
+    [Fact]
     public void MapRange_WithNoValues_ShouldReturnSelf()
     {
         // Arrange
@@ -174,10 +172,10 @@ public class EmailHelperTests
         var result = emailHelper.MapRange();
 
         // Assert
-        Assert.AreSame(emailHelper, result);
+        Assert.Same(emailHelper, result);
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_WithValidReceipts_ShouldReturnCommonMailMessage()
     {
         // Arrange
@@ -193,17 +191,17 @@ public class EmailHelperTests
         var result = emailHelper.BuildMessage(receipts, ccReceipts);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.IsInstanceOfType(result, typeof(CommonMailMessage));
-        Assert.AreSame(receipts, result.Receipts);
-        Assert.AreSame(ccReceipts, result.CcReceipts);
-        Assert.AreSame(_testSettings, result.Settings);
-        Assert.IsNotNull(result.Subject);
-        Assert.IsNotNull(result.Body);
-        Assert.IsTrue(result.BodyIsHtml);
+        Assert.NotNull(result);
+        Assert.IsType<CommonMailMessage>(result);
+        Assert.Same(receipts, result.Receipts);
+        Assert.Same(ccReceipts, result.CcReceipts);
+        Assert.Same(_testSettings, result.Settings);
+        Assert.NotNull(result.Subject);
+        Assert.NotNull(result.Body);
+        Assert.True(result.BodyIsHtml);
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_WithOnlyReceipts_ShouldReturnCommonMailMessage()
     {
         // Arrange
@@ -218,35 +216,35 @@ public class EmailHelperTests
         var result = emailHelper.BuildMessage(receipts);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreSame(receipts, result.Receipts);
-        Assert.IsNull(result.CcReceipts);
-        Assert.AreSame(_testSettings, result.Settings);
+        Assert.NotNull(result);
+        Assert.Same(receipts, result.Receipts);
+        Assert.Null(result.CcReceipts);
+        Assert.Same(_testSettings, result.Settings);
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_WithNullReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
         var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
         emailHelper.ForType("TestMail");
 
-        // Act
-        Assert.ThrowsExactly<ArgumentNullException>(() => emailHelper.BuildMessage(null));
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => emailHelper.BuildMessage(null));
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_WithEmptyReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
         var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
         emailHelper.ForType("TestMail");
 
-        // Act
-        Assert.ThrowsExactly<ArgumentNullException>(() => emailHelper.BuildMessage(new string[0]));
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => emailHelper.BuildMessage(new string[0]));
     }
 
-    [TestMethod]
+    [Fact]
     public void FluentInterface_ShouldWorkCorrectly()
     {
         // Arrange
@@ -264,14 +262,14 @@ public class EmailHelperTests
             .BuildMessage(receipts);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.IsInstanceOfType(result, typeof(CommonMailMessage));
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("MachineName"));
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("SmtpServer"));
-        Assert.IsTrue(emailHelper.Pipeline.HasEntity("Port"));
+        Assert.NotNull(result);
+        Assert.IsType<CommonMailMessage>(result);
+        Assert.True(emailHelper.Pipeline.HasEntity("MachineName"));
+        Assert.True(emailHelper.Pipeline.HasEntity("SmtpServer"));
+        Assert.True(emailHelper.Pipeline.HasEntity("Port"));
     }
 
-    [TestMethod]
+    [Fact]
     public void Engine_ShouldBeSetAfterBuildMessage()
     {
         // Arrange
@@ -286,11 +284,11 @@ public class EmailHelperTests
         emailHelper.BuildMessage(receipts);
 
         // Assert
-        Assert.IsNotNull(emailHelper.Engine);
-        Assert.IsInstanceOfType(emailHelper.Engine, typeof(TemplateEngine));
+        Assert.NotNull(emailHelper.Engine);
+        Assert.IsType<TemplateEngine>(emailHelper.Engine);
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_ShouldTrimSubjectAndBody()
     {
         // Arrange
@@ -317,11 +315,11 @@ public class EmailHelperTests
         var result = emailHelper.BuildMessage(receipts);
 
         // Assert
-        Assert.AreEqual("Test Subject", result.Subject);
-        Assert.AreEqual("Test Body", result.Body);
+        Assert.Equal("Test Subject", result.Subject);
+        Assert.Equal("Test Body", result.Body);
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildMessage_ShouldSetBodyIsHtmlFromConfiguration()
     {
         // Arrange
@@ -362,7 +360,7 @@ public class EmailHelperTests
         var textResult = emailHelperText.ForType("TextMail").BuildMessage(receipts);
 
         // Assert
-        Assert.IsTrue(htmlResult.BodyIsHtml);
-        Assert.IsFalse(textResult.BodyIsHtml);
+        Assert.True(htmlResult.BodyIsHtml);
+        Assert.False(textResult.BodyIsHtml);
     }
 }
