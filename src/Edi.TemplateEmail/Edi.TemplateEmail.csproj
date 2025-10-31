@@ -16,7 +16,7 @@
     <PackageIcon>edi-logo-blue.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.13.0" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
