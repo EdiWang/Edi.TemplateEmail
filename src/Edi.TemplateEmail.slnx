@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/App/">
+    <Project Path="Edi.TemplateEmail.TestConsole/Edi.TemplateEmail.TestConsole.csproj" />
+  </Folder>
+  <Folder Name="/Lib/">
+    <Project Path="Edi.TemplateEmail/Edi.TemplateEmail.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="../.gitattributes" />
+    <File Path="../.github/workflows/dotnet.yml" />
+    <File Path="../.gitignore" />
+    <File Path="../LICENSE" />
+    <File Path="../README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj" />
+  </Folder>
+</Solution>
