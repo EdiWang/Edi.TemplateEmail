@@ -2,7 +2,6 @@
 
 public interface IEmailHelper
 {
-    EmailSettings Settings { get; }
     TemplateEngine Engine { get; }
 
     public EmailHelper ForType(string mailType);

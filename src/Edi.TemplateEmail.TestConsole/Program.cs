@@ -1,4 +1,5 @@
 ﻿using Edi.TemplateEmail;
+using Edi.TemplateEmail.Smtp;
 using Spectre.Console;
 using System.Text;
 
@@ -14,35 +15,29 @@ var displayName = AnsiConsole.Ask<string>("Sender display name: ");
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
 
-var settings = new EmailSettings
+var emailSettings = new EmailSettings
 {
     SenderName = senderName,
     EmailDisplayName = displayName,
     SmtpSettings = new(smtpServer, userName, password, port)
 };
 
-var emailHelper = new EmailHelper(configSource, settings);
+var emailHelper = new EmailHelper(configSource);
 
 try
 {
     var message = emailHelper.ForType("TestMail")
-        //.Map("MachineName", Environment.MachineName)
-        //.Map("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer)
-        //.Map("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort)
-        //.Map("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName)
-        //.Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-        //.Map("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
         .MapRange(
             ("MachineName", Environment.MachineName),
-            ("SmtpServer", emailHelper.Settings.SmtpSettings.SmtpServer),
-            ("SmtpServerPort", emailHelper.Settings.SmtpSettings.SmtpServerPort),
-            ("SmtpUserName", emailHelper.Settings.SmtpSettings.SmtpUserName),
-            ("EmailDisplayName", emailHelper.Settings.EmailDisplayName),
-            ("EnableTls", emailHelper.Settings.SmtpSettings.EnableTls)
+            ("SmtpServer", emailSettings.SmtpSettings.SmtpServer),
+            ("SmtpServerPort", emailSettings.SmtpSettings.SmtpServerPort),
+            ("SmtpUserName", emailSettings.SmtpSettings.SmtpUserName),
+            ("EmailDisplayName", emailSettings.EmailDisplayName),
+            ("EnableTls", emailSettings.SmtpSettings.EnableTls)
         )
         .BuildMessage([toAddress]);
 
-    var result = await message.SendAsync();
+    var result = await message.SendAsync(emailSettings);
     Console.WriteLine($"Email is sent. Response: {result}");
 }
 catch (Exception e)

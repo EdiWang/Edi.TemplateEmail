@@ -5,8 +5,8 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Company>edi.wang</Company>
 		<Authors>Edi Wang</Authors>
-		<Description>Write email template in xml and build email messages</Description>
-		<PackageTags>Email Template</PackageTags>
+		<Description>SMTP email sending extension for Edi.TemplateEmail using MailKit</Description>
+		<PackageTags>Email SMTP MailKit</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://edi.wang</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
@@ -15,6 +15,12 @@
 		<SignAssembly>true</SignAssembly>
 		<PackageIcon>edi-logo-blue.png</PackageIcon>
 	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="MailKit" Version="4.15.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Edi.TemplateEmail\Edi.TemplateEmail.csproj" />
+	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
 		<None Include="..\..\img\edi-logo-blue.png" Pack="true" PackagePath="\" />

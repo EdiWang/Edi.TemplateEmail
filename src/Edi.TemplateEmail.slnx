@@ -3,6 +3,7 @@
     <Project Path="Edi.TemplateEmail.TestConsole/Edi.TemplateEmail.TestConsole.csproj" />
   </Folder>
   <Folder Name="/Lib/">
+    <Project Path="Edi.TemplateEmail.Smtp/Edi.TemplateEmail.Smtp.csproj" />
     <Project Path="Edi.TemplateEmail/Edi.TemplateEmail.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

@@ -6,8 +6,6 @@ namespace Edi.TemplateEmail;
 
 public class EmailHelper : IEmailHelper
 {
-    public EmailSettings Settings { get; }
-
     public TemplateEngine Engine { get; private set; }
 
     public TemplatePipeline Pipeline { get; private set; }
@@ -15,16 +13,13 @@ public class EmailHelper : IEmailHelper
     private readonly MailConfiguration _mailConfiguration;
     private string _mailType;
 
-    public EmailHelper(MailConfiguration configuration, EmailSettings settings)
+    public EmailHelper(MailConfiguration configuration)
     {
-        Settings = settings;
         _mailConfiguration = configuration;
     }
 
-    public EmailHelper(string configPath, EmailSettings settings)
+    public EmailHelper(string configPath)
     {
-        Settings = settings;
-
         if (string.IsNullOrWhiteSpace(configPath))
         {
             throw new ArgumentNullException(nameof(configPath));
@@ -76,8 +71,7 @@ public class EmailHelper : IEmailHelper
             Body = bodyText,
             Receipts = receipts,
             CcReceipts = ccReceipts,
-            BodyIsHtml = Engine.TextProvider.IsHtml,
-            Settings = Settings
+            BodyIsHtml = Engine.TextProvider.IsHtml
         };
 
         return cm;

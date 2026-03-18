@@ -5,22 +5,11 @@ namespace Edi.TemplateEmail.Tests;
 
 public class EmailHelperTests : IDisposable
 {
-    private readonly EmailSettings _testSettings;
     private readonly MailConfiguration _testMailConfiguration;
     private readonly string _testConfigPath;
 
     public EmailHelperTests()
     {
-        _testSettings = new EmailSettings
-        {
-            SenderName = "test@example.com",
-            EmailDisplayName = "Test Sender",
-            SmtpSettings = new SmtpSettings("smtp.test.com", "testuser", "testpass", 587)
-            {
-                EnableTls = true
-            }
-        };
-
         _testMailConfiguration = new MailConfiguration
         {
             MailMessages =
@@ -54,10 +43,9 @@ public class EmailHelperTests : IDisposable
     public void Constructor_WithConfiguration_ShouldSetProperties()
     {
         // Act
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
 
         // Assert
-        Assert.Equal(_testSettings, emailHelper.Settings);
         Assert.Null(emailHelper.Engine);
         Assert.Null(emailHelper.Pipeline);
     }
@@ -66,10 +54,9 @@ public class EmailHelperTests : IDisposable
     public void Constructor_WithConfigPath_ShouldSetProperties()
     {
         // Act
-        var emailHelper = new EmailHelper(_testConfigPath, _testSettings);
+        var emailHelper = new EmailHelper(_testConfigPath);
 
         // Assert
-        Assert.Equal(_testSettings, emailHelper.Settings);
         Assert.Null(emailHelper.Engine);
         Assert.Null(emailHelper.Pipeline);
     }
@@ -78,35 +65,35 @@ public class EmailHelperTests : IDisposable
     public void Constructor_WithNullConfigPath_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new EmailHelper((string)null, _testSettings));
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper((string)null));
     }
 
     [Fact]
     public void Constructor_WithEmptyConfigPath_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new EmailHelper(string.Empty, _testSettings));
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper(string.Empty));
     }
 
     [Fact]
     public void Constructor_WithWhitespaceConfigPath_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new EmailHelper("   ", _testSettings));
+        Assert.Throws<ArgumentNullException>(() => new EmailHelper("   "));
     }
 
     [Fact]
     public void Constructor_WithNonExistentConfigPath_ShouldThrowFileNotFoundException()
     {
         // Act & Assert
-        Assert.Throws<FileNotFoundException>(() => new EmailHelper("nonexistent.xml", _testSettings));
+        Assert.Throws<FileNotFoundException>(() => new EmailHelper("nonexistent.xml"));
     }
 
     [Fact]
     public void ForType_ShouldSetMailTypeAndCreatePipeline()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         const string mailType = "TestMail";
 
         // Act
@@ -121,7 +108,7 @@ public class EmailHelperTests : IDisposable
     public void Map_ShouldAddValueToPipeline()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         emailHelper.ForType("TestMail");
         const string name = "TestName";
         const string value = "TestValue";
@@ -139,7 +126,7 @@ public class EmailHelperTests : IDisposable
     public void MapRange_ShouldAddMultipleValuesToPipeline()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         emailHelper.ForType("TestMail");
         var values = new (string name, object value)[]
         {
@@ -165,7 +152,7 @@ public class EmailHelperTests : IDisposable
     public void MapRange_WithNoValues_ShouldReturnSelf()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         emailHelper.ForType("TestMail");
 
         // Act
@@ -179,7 +166,7 @@ public class EmailHelperTests : IDisposable
     public void BuildMessage_WithValidReceipts_ShouldReturnCommonMailMessage()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         var receipts = new[] { "test1@example.com", "test2@example.com" };
         var ccReceipts = new[] { "cc1@example.com" };
 
@@ -195,7 +182,6 @@ public class EmailHelperTests : IDisposable
         Assert.IsType<CommonMailMessage>(result);
         Assert.Same(receipts, result.Receipts);
         Assert.Same(ccReceipts, result.CcReceipts);
-        Assert.Same(_testSettings, result.Settings);
         Assert.NotNull(result.Subject);
         Assert.NotNull(result.Body);
         Assert.True(result.BodyIsHtml);
@@ -205,7 +191,7 @@ public class EmailHelperTests : IDisposable
     public void BuildMessage_WithOnlyReceipts_ShouldReturnCommonMailMessage()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         var receipts = new[] { "test@example.com" };
 
         emailHelper.ForType("TestMail")
@@ -219,14 +205,13 @@ public class EmailHelperTests : IDisposable
         Assert.NotNull(result);
         Assert.Same(receipts, result.Receipts);
         Assert.Null(result.CcReceipts);
-        Assert.Same(_testSettings, result.Settings);
     }
 
     [Fact]
     public void BuildMessage_WithNullReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         emailHelper.ForType("TestMail");
 
         // Act & Assert
@@ -237,7 +222,7 @@ public class EmailHelperTests : IDisposable
     public void BuildMessage_WithEmptyReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         emailHelper.ForType("TestMail");
 
         // Act & Assert
@@ -248,7 +233,7 @@ public class EmailHelperTests : IDisposable
     public void FluentInterface_ShouldWorkCorrectly()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         var receipts = new[] { "test@example.com" };
 
         // Act
@@ -273,7 +258,7 @@ public class EmailHelperTests : IDisposable
     public void Engine_ShouldBeSetAfterBuildMessage()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration, _testSettings);
+        var emailHelper = new EmailHelper(_testMailConfiguration);
         var receipts = new[] { "test@example.com" };
 
         emailHelper.ForType("TestMail")
@@ -306,7 +291,7 @@ public class EmailHelperTests : IDisposable
             ]
         };
 
-        var emailHelper = new EmailHelper(configWithWhitespace, _testSettings);
+        var emailHelper = new EmailHelper(configWithWhitespace);
         var receipts = new[] { "test@example.com" };
 
         emailHelper.ForType("TestMail");
@@ -351,8 +336,8 @@ public class EmailHelperTests : IDisposable
             ]
         };
 
-        var emailHelperHtml = new EmailHelper(htmlConfig, _testSettings);
-        var emailHelperText = new EmailHelper(textConfig, _testSettings);
+        var emailHelperHtml = new EmailHelper(htmlConfig);
+        var emailHelperText = new EmailHelper(textConfig);
         var receipts = new[] { "test@example.com" };
 
         // Act

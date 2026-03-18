@@ -1,4 +1,4 @@
-﻿namespace Edi.TemplateEmail;
+namespace Edi.TemplateEmail.Smtp;
 
 public class EmailSettings
 {
