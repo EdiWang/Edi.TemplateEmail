@@ -15,12 +15,21 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
-    - name: Build with dotnet
+    - name: Build Edi.TemplateEmail
       run: dotnet build --configuration Release
       working-directory: ./src/Edi.TemplateEmail
-    - name: Generate nuget package
+    - name: Build Edi.TemplateEmail.Smtp
+      run: dotnet build --configuration Release
+      working-directory: ./src/Edi.TemplateEmail.Smtp
+    - name: Pack Edi.TemplateEmail
       run: dotnet pack --configuration Release -o nupkg
       working-directory: ./src/Edi.TemplateEmail
-    - name: Push nuget package
+    - name: Pack Edi.TemplateEmail.Smtp
+      run: dotnet pack --configuration Release -o nupkg
+      working-directory: ./src/Edi.TemplateEmail.Smtp
+    - name: Push Edi.TemplateEmail
       run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
       working-directory: ./src/Edi.TemplateEmail
+    - name: Push Edi.TemplateEmail.Smtp
+      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+      working-directory: ./src/Edi.TemplateEmail.Smtp
