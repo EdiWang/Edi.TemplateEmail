@@ -20,4 +20,9 @@ public class SmtpSettings(string smtpServer, string smtpUserName, string smtpPas
     public int SmtpServerPort { get; } = smtpServerPort;
 
     public bool EnableTls { get; set; } = true;
+
+    /// <summary>
+    /// Skips TLS certificate validation. Should only be used in development environments.
+    /// </summary>
+    public bool SkipCertificateValidation { get; set; } = false;
 }

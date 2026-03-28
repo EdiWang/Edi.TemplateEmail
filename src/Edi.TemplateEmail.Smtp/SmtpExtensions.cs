@@ -1,6 +1,7 @@
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Edi.TemplateEmail.Smtp;
@@ -36,22 +37,27 @@ public static class SmtpExtensions
         return messageToSend;
     }
 
-    public static async Task<string> SendAsync(this CommonMailMessage message, EmailSettings settings)
+    public static async Task<string> SendAsync(this CommonMailMessage message, EmailSettings settings, CancellationToken cancellationToken = default)
     {
         using var smtp = new MailKit.Net.Smtp.SmtpClient();
-        smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
+        if (settings.SmtpSettings.SkipCertificateValidation)
+        {
+            smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
+        }
+
         await smtp.ConnectAsync(
             settings.SmtpSettings.SmtpServer,
             settings.SmtpSettings.SmtpServerPort,
-            settings.SmtpSettings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+            settings.SmtpSettings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto,
+            cancellationToken);
         if (!string.IsNullOrEmpty(settings.SmtpSettings.SmtpUserName))
         {
-            await smtp.AuthenticateAsync(settings.SmtpSettings.SmtpUserName, settings.SmtpSettings.SmtpPassword);
+            await smtp.AuthenticateAsync(settings.SmtpSettings.SmtpUserName, settings.SmtpSettings.SmtpPassword, cancellationToken);
         }
 
         var messageToSend = message.ToMimeMessage(settings);
-        var result = await smtp.SendAsync(messageToSend);
-        await smtp.DisconnectAsync(true);
+        var result = await smtp.SendAsync(messageToSend, cancellationToken: cancellationToken);
+        await smtp.DisconnectAsync(true, cancellationToken);
 
         return result;
     }

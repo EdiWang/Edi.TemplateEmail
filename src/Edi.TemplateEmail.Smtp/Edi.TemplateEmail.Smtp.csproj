@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net10.0</TargetFrameworks>
-		<Version>2026.3.0</Version>
+		<Version>2026.4.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Company>edi.wang</Company>
 		<Authors>Edi Wang</Authors>
@@ -17,6 +17,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.15.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.*" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Edi.TemplateEmail\Edi.TemplateEmail.csproj" />
