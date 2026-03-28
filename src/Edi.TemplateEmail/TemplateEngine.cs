@@ -1,25 +1,25 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Edi.TemplateEmail;
 
-public class TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
+public partial class TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
 {
-    private const string FormatPattern = @"{(?<Entity>\w+).(?<Property>\w+)";
+    [GeneratedRegex(@"\{(?<Entity>\w+)\.(?<Property>\w+)")]
+    private static partial Regex FormatRegex();
 
     public TemplatePipeline Pipeline { get; } = pipeline;
 
     public TemplateMailMessage TextProvider { get; } = provider;
 
-    public string Format(Func<StringBuilder> textSelector)
+    public string Format(string text)
     {
         // Find all the personalization tokens in the text
         // They should be in the format {<item name>.<item property>}
         // Eg. {User.FirstName} will be replaced by the FirstName property
         // of the personalization item named "User"
-        MatchCollection matches = Regex.Matches(textSelector().ToString(), FormatPattern);
-        StringBuilder formattedText = textSelector();
+        MatchCollection matches = FormatRegex().Matches(text);
+        var formattedText = new StringBuilder(text);
 
         foreach (Match match in matches)
         {

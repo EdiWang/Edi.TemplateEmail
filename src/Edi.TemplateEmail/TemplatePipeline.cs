@@ -4,38 +4,18 @@ namespace Edi.TemplateEmail;
 
 public class TemplatePipeline
 {
-    /// <summary>
-    /// The internal pipeline
-    /// </summary>
-    private readonly Dictionary<string, object> _pipeline = new();
-
-    /// <summary>
-    /// Adds the specified obj by name to the pipeline.
-    /// </summary>
-    /// <param name="name">The name.</param>
-    /// <param name="obj">The object.</param>
-    private void Add(string name, object obj)
-    {
-        _pipeline[name] = obj;
-    }
+    private readonly Dictionary<string, PipelineItem> _pipeline = new();
 
     public TemplatePipeline Map(string name, object value)
     {
-        Add(name, value);
+        _pipeline[name] = new PipelineItem { Name = name, Value = value };
         return this;
     }
 
-    /// <summary>
-    /// Determines whether the specified entity name has entity.
-    /// </summary>
-    /// <param name="entityName">Name of the entity.</param>
-    /// <returns>
-    /// 	<c>true</c> if the specified entity name has entity; otherwise, <c>false</c>.
-    /// </returns>
     public bool HasEntity(string entityName)
     {
         return _pipeline.ContainsKey(entityName);
     }
 
-    public PipelineItem this[string name] => new() { Name = name, Value = _pipeline[name] };
+    public PipelineItem this[string name] => _pipeline[name];
 }
