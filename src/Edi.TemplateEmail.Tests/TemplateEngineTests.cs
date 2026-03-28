@@ -1,4 +1,3 @@
-using System.Text;
 using Xunit;
 
 namespace Edi.TemplateEmail.Tests;
@@ -47,7 +46,7 @@ public class TemplateEngineTests
         string template = "Hello {User.Value}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello John Doe!", result);
@@ -62,7 +61,7 @@ public class TemplateEngineTests
         string template = "Hello {User.FirstName} {User.LastName}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello John Doe!", result);
@@ -79,7 +78,7 @@ public class TemplateEngineTests
         string template = "Dear {User.Name}, welcome to {Company.Name}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Dear John, welcome to ACME Corp!", result);
@@ -92,7 +91,7 @@ public class TemplateEngineTests
         string template = "Hello {NonExistent.Property}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello !", result);
@@ -107,7 +106,7 @@ public class TemplateEngineTests
         string template = "Hello {User.NonExistentProperty}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello !", result);
@@ -120,7 +119,7 @@ public class TemplateEngineTests
         string template = "Hello World! No tokens here.";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal(template, result);
@@ -133,7 +132,7 @@ public class TemplateEngineTests
         string template = "";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("", result);
@@ -147,7 +146,7 @@ public class TemplateEngineTests
         string template = "{User.Value} said hello to {User.Value} in the mirror.";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("John said hello to John in the mirror.", result);
@@ -168,7 +167,7 @@ public class TemplateEngineTests
         string template = "Name: {User.FirstName} {User.LastName}, Email: {User.Email}, Age: {User.Age}";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Name: John Doe, Email: john.doe@example.com, Age: 30", result);
@@ -182,7 +181,7 @@ public class TemplateEngineTests
         string template = "Hello {User Value} and {User.} and {.Value}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello {User Value} and {User.} and {.Value}!", result);
@@ -196,7 +195,7 @@ public class TemplateEngineTests
         string template = "Hello {{User.Value}} and {User.Value}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello {John} and John!", result);
@@ -211,7 +210,7 @@ public class TemplateEngineTests
         string template = "Count: {Stats.Count}, Average: {Stats.Average}";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Count: 42, Average: 3.14", result);
@@ -226,7 +225,7 @@ public class TemplateEngineTests
         string template = "Enabled: {Settings.IsEnabled}, Visible: {Settings.IsVisible}";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Enabled: True, Visible: False", result);
@@ -241,7 +240,7 @@ public class TemplateEngineTests
         string template = "Hello {User.FirstName} {User.LastName}!";
 
         // Act
-        string result = _templateEngine.Format(() => new StringBuilder(template));
+        string result = _templateEngine.Format(template);
 
         // Assert
         Assert.Equal("Hello John !", result);
