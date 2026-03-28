@@ -4,8 +4,8 @@ public interface IEmailHelper
 {
     TemplateEngine Engine { get; }
 
-    public EmailHelper ForType(string mailType);
-    public EmailHelper Map(string name, object value);
-    public EmailHelper MapRange(params (string name, object value)[] values);
-    public CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null);
+    IEmailHelper ForType(string mailType);
+    IEmailHelper Map(string name, object value);
+    IEmailHelper MapRange(params (string name, object value)[] values);
+    CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null);
 }

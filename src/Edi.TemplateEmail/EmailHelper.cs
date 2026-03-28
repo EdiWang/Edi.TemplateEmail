@@ -30,20 +30,21 @@ public class EmailHelper : IEmailHelper
         _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
     }
 
-    public EmailHelper ForType(string mailType)
+    public IEmailHelper ForType(string mailType)
     {
         _mailType = mailType;
         Pipeline = new();
+        Engine = null;
         return this;
     }
 
-    public EmailHelper Map(string name, object value)
+    public IEmailHelper Map(string name, object value)
     {
         Pipeline.Map(name, value);
         return this;
     }
 
-    public EmailHelper MapRange(params (string name, object value)[] values)
+    public IEmailHelper MapRange(params (string name, object value)[] values)
     {
         foreach (var (name, value) in values)
         {
@@ -62,8 +63,8 @@ public class EmailHelper : IEmailHelper
 
         LoadEngine();
 
-        var subjectText = Engine.Format(() => new(Engine.TextProvider.Subject)).Trim();
-        var bodyText = Engine.Format(() => new(Engine.TextProvider.Text)).Trim();
+        var subjectText = Engine.Format(Engine.TextProvider.Subject).Trim();
+        var bodyText = Engine.Format(Engine.TextProvider.Text).Trim();
 
         var cm = new CommonMailMessage
         {
@@ -80,10 +81,11 @@ public class EmailHelper : IEmailHelper
     private void LoadEngine()
     {
         var messageToPersonalize = new TemplateMailMessage(_mailConfiguration, _mailType);
-        if (messageToPersonalize.Loaded)
+        if (!messageToPersonalize.Loaded)
         {
-            var engine = new TemplateEngine(messageToPersonalize, Pipeline);
-            Engine = engine;
+            throw new InvalidOperationException($"Mail type '{_mailType}' was not found in the mail configuration.");
         }
+
+        Engine = new TemplateEngine(messageToPersonalize, Pipeline);
     }
 }
