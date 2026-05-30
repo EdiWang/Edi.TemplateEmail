@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net10.0</TargetFrameworks>
-		<Version>2026.4.1</Version>
+		<Version>2026.4.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Company>edi.wang</Company>
 		<Authors>Edi Wang</Authors>
@@ -16,7 +16,7 @@
 		<PackageIcon>edi-logo-blue.png</PackageIcon>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="MailKit" Version="4.16.0" />
+		<PackageReference Include="MailKit" Version="4.17.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.*" />
 	</ItemGroup>
 	<ItemGroup>
