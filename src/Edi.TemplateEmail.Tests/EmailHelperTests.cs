@@ -123,6 +123,16 @@ public class EmailHelperTests : IDisposable
     }
 
     [Fact]
+    public void Map_WithoutForType_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var emailHelper = new EmailHelper(_testMailConfiguration);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => emailHelper.Map("TestName", "TestValue"));
+    }
+
+    [Fact]
     public void MapRange_ShouldAddMultipleValuesToPipeline()
     {
         // Arrange
@@ -160,6 +170,16 @@ public class EmailHelperTests : IDisposable
 
         // Assert
         Assert.Same(emailHelper, result);
+    }
+
+    [Fact]
+    public void MapRange_WithoutForType_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var emailHelper = new EmailHelper(_testMailConfiguration);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => emailHelper.MapRange(("TestName", "TestValue")));
     }
 
     [Fact]
@@ -216,6 +236,16 @@ public class EmailHelperTests : IDisposable
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => emailHelper.BuildMessage(null));
+    }
+
+    [Fact]
+    public void BuildMessage_WithoutForType_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var emailHelper = new EmailHelper(_testMailConfiguration);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => emailHelper.BuildMessage(["test@example.com"]));
     }
 
     [Fact]

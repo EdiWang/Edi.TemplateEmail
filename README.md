@@ -3,7 +3,7 @@ Edi.TemplateEmail
 
 This library enable you to configure email in XML template and send the email in your .NET applications.
 
-> Currently, only SMTP Basic Authentication is supported.
+> SMTP sending is available through the `Edi.TemplateEmail.Smtp` package.
 
 [![NuGet][main-nuget-badge]][main-nuget]
 
@@ -14,6 +14,7 @@ This library enable you to configure email in XML template and send the email in
 
 ```
 dotnet add package Edi.TemplateEmail
+dotnet add package Edi.TemplateEmail.Smtp
 ```
 
 ## Usage
@@ -24,7 +25,6 @@ dotnet add package Edi.TemplateEmail
 ```xml
 <?xml version="1.0"?>
 <MailConfiguration>
-  <CommonConfiguration OverrideToAddress="false" ToAddress="overridetest@test.com" />
   <MailMessage MessageType="TestMail" IsHtml="true">
     <MessageSubject>Test Mail on {MachineName.Value}</MessageSubject>
     <MessageBody>
@@ -34,7 +34,7 @@ Smtp Server: {SmtpServer.Value}<br />
 Smtp Port: {SmtpServerPort.Value}<br />
 Smtp Username: {SmtpUserName.Value}<br />
 Email Display Name: {EmailDisplayName.Value}<br />
-Enable SSL: {EnableSsl.Value}<br />
+Enable TLS: {EnableTls.Value}<br />
       ]]>
     </MessageBody>
   </MailMessage>
@@ -52,13 +52,18 @@ var userName = "test1@example.com";
 var password = "********";
 var port = 25;
 var toAddress = "test2@test.com";
+var senderName = "test1@example.com";
+var displayName = "Test Sender";
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
-var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, password, port)
+var emailSettings = new EmailSettings
 {
     SenderName = senderName,
-    EmailDisplayName = displayName
-});
+    EmailDisplayName = displayName,
+    SmtpSettings = new(smtpServer, userName, password, port)
+};
+
+var emailHelper = new EmailHelper(configSource);
 ```
 
 ### Step 3: Map the values and send Email
@@ -66,12 +71,12 @@ var emailHelper = new EmailHelper(configSource, new(smtpServer, userName, passwo
 ```
 var message = emailHelper.ForType("TestMail")
     .Map("MachineName", Environment.MachineName)
-    .Map("SmtpServer", emailHelper.Settings.SmtpServer)
-    .Map("SmtpServerPort", emailHelper.Settings.SmtpServerPort)
-    .Map("SmtpUserName", emailHelper.Settings.SmtpUserName)
-    .Map("EmailDisplayName", emailHelper.Settings.EmailDisplayName)
-    .Map("EnableTls", emailHelper.Settings.EnableTls)
+    .Map("SmtpServer", emailSettings.SmtpSettings.SmtpServer)
+    .Map("SmtpServerPort", emailSettings.SmtpSettings.SmtpServerPort)
+    .Map("SmtpUserName", emailSettings.SmtpSettings.SmtpUserName)
+    .Map("EmailDisplayName", emailSettings.EmailDisplayName)
+    .Map("EnableTls", emailSettings.SmtpSettings.EnableTls)
     .BuildMessage([toAddress]);
 
-var result = await message.SendAsync();
+var result = await message.SendAsync(emailSettings);
 ```

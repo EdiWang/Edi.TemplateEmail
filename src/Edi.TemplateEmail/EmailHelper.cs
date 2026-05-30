@@ -40,12 +40,14 @@ public class EmailHelper : IEmailHelper
 
     public IEmailHelper Map(string name, object value)
     {
+        EnsurePipelineInitialized();
         Pipeline.Map(name, value);
         return this;
     }
 
     public IEmailHelper MapRange(params (string name, object value)[] values)
     {
+        EnsurePipelineInitialized();
         foreach (var (name, value) in values)
         {
             Pipeline.Map(name, value);
@@ -56,6 +58,8 @@ public class EmailHelper : IEmailHelper
 
     public CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null)
     {
+        EnsurePipelineInitialized();
+
         if (null == receipts || receipts.Length == 0)
         {
             throw new ArgumentNullException(nameof(receipts));
@@ -87,5 +91,13 @@ public class EmailHelper : IEmailHelper
         }
 
         Engine = new TemplateEngine(messageToPersonalize, Pipeline);
+    }
+
+    private void EnsurePipelineInitialized()
+    {
+        if (Pipeline is null)
+        {
+            throw new InvalidOperationException("Call ForType before mapping values or building a message.");
+        }
     }
 }

@@ -5,7 +5,7 @@ namespace Edi.TemplateEmail;
 
 public partial class TemplateEngine(TemplateMailMessage provider, TemplatePipeline pipeline)
 {
-    [GeneratedRegex(@"\{(?<Entity>\w+)\.(?<Property>\w+)")]
+    [GeneratedRegex(@"\{(?<Entity>\w+)\.(?<Property>\w+)\}")]
     private static partial Regex FormatRegex();
 
     public TemplatePipeline Pipeline { get; } = pipeline;

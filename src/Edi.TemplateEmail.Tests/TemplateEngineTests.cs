@@ -178,13 +178,13 @@ public class TemplateEngineTests
     {
         // Arrange
         _pipeline.Map("User", "John");
-        string template = "Hello {User Value} and {User.} and {.Value}!";
+        string template = "Hello {User Value} and {User.} and {.Value} and {User.Value!";
 
         // Act
         string result = _templateEngine.Format(template);
 
         // Assert
-        Assert.Equal("Hello {User Value} and {User.} and {.Value}!", result);
+        Assert.Equal("Hello {User Value} and {User.} and {.Value} and {User.Value!", result);
     }
 
     [Fact]
