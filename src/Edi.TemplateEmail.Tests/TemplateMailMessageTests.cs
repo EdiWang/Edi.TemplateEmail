@@ -206,7 +206,7 @@ public class TemplateMailMessageTests
     }
 
     [Fact]
-    public void Constructor_WithNullMailMessages_ShouldThrowException()
+    public void Constructor_WithNullMailMessages_ShouldSetLoadedToFalse()
     {
         // Arrange
         var configWithNullMessages = new MailConfiguration
@@ -214,9 +214,14 @@ public class TemplateMailMessageTests
             MailMessages = null
         };
 
-        // Act & Assert
-        Assert.Throws<NullReferenceException>(() =>
-            new TemplateMailMessage(configWithNullMessages, "Welcome"));
+        // Act
+        var templateMail = new TemplateMailMessage(configWithNullMessages, "Welcome");
+
+        // Assert
+        Assert.False(templateMail.Loaded);
+        Assert.Null(templateMail.Text);
+        Assert.False(templateMail.IsHtml);
+        Assert.Null(templateMail.Subject);
     }
 
     [Fact]

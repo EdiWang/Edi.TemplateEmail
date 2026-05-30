@@ -17,7 +17,7 @@ public class TemplateMailMessage
     {
         Loaded = false;
 
-        if (null == mailConfig) return;
+        if (null == mailConfig || null == mailConfig.MailMessages) return;
 
         // Load all the mail message templates that 
         // match the message type

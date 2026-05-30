@@ -9,5 +9,5 @@ namespace Edi.TemplateEmail;
 public class MailConfiguration
 {
     [XmlElement("MailMessage")]
-    public List<MailMessageConfiguration> MailMessages { get; set; }
+    public List<MailMessageConfiguration> MailMessages { get; set; } = [];
 }
