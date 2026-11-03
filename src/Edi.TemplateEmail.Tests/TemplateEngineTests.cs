@@ -153,6 +153,35 @@ public class TemplateEngineTests
     }
 
     [Fact]
+    public void Format_WithMappedValueContainingAnotherToken_ShouldPreserveValueRegardlessOfTokenOrder()
+    {
+        // Arrange
+        _pipeline.Map("A", "{B.Value}").Map("B", "secret");
+
+        // Act
+        string forward = _templateEngine.Format("{A.Value}|{B.Value}");
+        string reverse = _templateEngine.Format("{B.Value}|{A.Value}");
+
+        // Assert
+        Assert.Equal("{B.Value}|secret", forward);
+        Assert.Equal("secret|{B.Value}", reverse);
+    }
+
+    [Fact]
+    public void Format_WithRepeatedTokenAndSelfReferencingValue_ShouldReplaceEachOccurrenceOnce()
+    {
+        // Arrange
+        _pipeline.Map("User", "{User.Value}!");
+        string template = "{User.Value}|{User.Value}";
+
+        // Act
+        string result = _templateEngine.Format(template);
+
+        // Assert
+        Assert.Equal("{User.Value}!|{User.Value}!", result);
+    }
+
+    [Fact]
     public void Format_WithComplexObject_ShouldReplaceCorrectly()
     {
         // Arrange
