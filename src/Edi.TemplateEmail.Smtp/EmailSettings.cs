@@ -2,7 +2,17 @@ namespace Edi.TemplateEmail.Smtp;
 
 public class EmailSettings
 {
+    /// <summary>
+    /// Required From address, independent of the SMTP authentication user name.
+    /// </summary>
+    public string FromAddress { get; set; }
+
     public string EmailDisplayName { get; set; }
+
+    /// <summary>
+    /// Optional Sender address when sending on behalf of the From address.
+    /// </summary>
+    public string SenderAddress { get; set; }
 
     public string SenderName { get; set; }
 

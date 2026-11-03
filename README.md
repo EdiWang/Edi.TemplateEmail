@@ -52,19 +52,30 @@ var userName = "test1@example.com";
 var password = "********";
 var port = 25;
 var toAddress = "test2@test.com";
-var senderName = "test1@example.com";
+var fromAddress = "notifications@example.com";
 var displayName = "Test Sender";
 
 var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
 var emailSettings = new EmailSettings
 {
-    SenderName = senderName,
+    FromAddress = fromAddress,
     EmailDisplayName = displayName,
     SmtpSettings = new(smtpServer, userName, password, port)
 };
 
 var emailHelper = new EmailHelper(configSource);
 ```
+
+`FromAddress` is required and is independent of the SMTP login. `EmailDisplayName` is the display name for this address. Set the SMTP user name to `null` or an empty string to send without authentication; authenticated user names do not have to be email addresses.
+
+When sending on behalf of another address, optionally set `SenderAddress` and its display name, `SenderName`. The `Sender` header is omitted when `SenderAddress` is not configured:
+
+```csharp
+emailSettings.SenderAddress = "mailer@example.com";
+emailSettings.SenderName = "Mail Service";
+```
+
+When upgrading, explicitly set `FromAddress` (usually to the email address previously used as the SMTP user name). Set `SenderAddress` as well if you need the previous `Sender` header; `SenderName` alone no longer adds it.
 
 ### Step 3: Map the values and send Email
 

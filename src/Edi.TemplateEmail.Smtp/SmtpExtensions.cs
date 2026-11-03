@@ -1,6 +1,7 @@
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,12 +11,15 @@ public static class SmtpExtensions
 {
     public static MimeMessage ToMimeMessage(this CommonMailMessage message, EmailSettings settings)
     {
-        var messageToSend = new MimeMessage
-        {
-            Sender = new(settings.SenderName, settings.SmtpSettings.SmtpUserName),
-        };
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.FromAddress, nameof(settings.FromAddress));
 
-        messageToSend.From.Add(new MailboxAddress(settings.EmailDisplayName, settings.SmtpSettings.SmtpUserName));
+        var messageToSend = new MimeMessage();
+        if (!string.IsNullOrEmpty(settings.SenderAddress))
+        {
+            messageToSend.Sender = new(settings.SenderName, settings.SenderAddress);
+        }
+
+        messageToSend.From.Add(new MailboxAddress(settings.EmailDisplayName, settings.FromAddress));
         messageToSend.Subject = message.Subject;
         messageToSend.Body = message.BodyIsHtml
             ? new(TextFormat.Html) { Text = message.Body }
