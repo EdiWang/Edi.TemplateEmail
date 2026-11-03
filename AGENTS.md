@@ -19,7 +19,7 @@ Use the .NET 10 SDK. Run commands from the repository root; restore is implicit.
 
 ```sh
 dotnet build src/Edi.TemplateEmail.slnx --configuration Release
-dotnet test src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release
+dotnet test --project src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release
 ```
 
 - Run the build and tests for code changes. CI currently does not run tests, so a successful workflow does not replace local test validation.
