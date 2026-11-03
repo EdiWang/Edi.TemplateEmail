@@ -110,3 +110,20 @@ var message = emailHelper.ForType("TestMail")
 
 var result = await message.SendAsync(emailSettings);
 ```
+
+### Token values
+
+Tokens use `{Entity.Property}` with case-sensitive names. Map an entity before calling `BuildMessage`:
+
+```csharp
+var message = emailHelper.ForType("TestMail")
+    .Map("SentAt", DateTime.Now)
+    .Map("User", new { Name = "Alice" })
+    .BuildMessage([toAddress]);
+```
+
+- `{SentAt.Value}` uses the mapped value's `ToString()`, including dates, numbers, enums, and objects. Formatting uses the value's normal `ToString()` behavior and current culture where applicable.
+- `Value` is reserved for the whole mapped value, even when the object has a property named `Value`. To render that property, map its value separately, for example `.Map("Amount", model.Value)` and use `{Amount.Value}`.
+- Other property names, such as `{User.Name}`, read public instance getters without index parameters. Indexers, static properties, and properties without a public getter return an empty string. Exceptions thrown by a readable getter still propagate.
+- Strings return the mapped string for any property name. Values without public properties retain the `ToString()` fallback for any property name.
+- Missing entities or properties and null mapped or property values produce an empty string.
