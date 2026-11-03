@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      id-token: write  # enable GitHub OIDC token issuance for this job
 
     runs-on: ubuntu-latest
 
@@ -27,9 +29,14 @@ jobs:
     - name: Pack Edi.TemplateEmail.Smtp
       run: dotnet pack --configuration Release -o nupkg
       working-directory: ./src/Edi.TemplateEmail.Smtp
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{secrets.NUGET_USER}}
     - name: Push Edi.TemplateEmail
-      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
       working-directory: ./src/Edi.TemplateEmail
     - name: Push Edi.TemplateEmail.Smtp
-      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
       working-directory: ./src/Edi.TemplateEmail.Smtp
