@@ -1,5 +1,6 @@
 ﻿using Edi.TemplateEmail;
 using Edi.TemplateEmail.Smtp;
+using MailKit.Security;
 using Spectre.Console;
 using System.Text;
 
@@ -10,7 +11,12 @@ var userName = AnsiConsole.Prompt(new TextPrompt<string>("SMTP user name (leave 
 var password = string.IsNullOrEmpty(userName)
     ? null
     : AnsiConsole.Prompt(new TextPrompt<string>("SMTP password:").Secret());
-var port = AnsiConsole.Ask<int>("Port number (e.g. 25): ");
+var port = AnsiConsole.Ask<int>("Port number (e.g. 587 or 465): ");
+var socketOptions = AnsiConsole.Prompt(
+    new SelectionPrompt<SecureSocketOptions>()
+        .Title("SMTP security (587: StartTls, 465: SslOnConnect):")
+        .AddChoices(SecureSocketOptions.StartTls, SecureSocketOptions.SslOnConnect,
+            SecureSocketOptions.StartTlsWhenAvailable, SecureSocketOptions.Auto, SecureSocketOptions.None));
 var toAddress = AnsiConsole.Ask<string>("To email address: ");
 var fromAddress = AnsiConsole.Ask<string>("From email address: ");
 var displayName = AnsiConsole.Ask<string>("Sender display name: ");
@@ -21,7 +27,7 @@ var emailSettings = new EmailSettings
 {
     FromAddress = fromAddress,
     EmailDisplayName = displayName,
-    SmtpSettings = new(smtpServer, userName, password, port)
+    SmtpSettings = new(smtpServer, userName, password, port) { SocketOptions = socketOptions }
 };
 
 var emailHelper = new EmailHelper(configSource);
@@ -35,7 +41,7 @@ try
             ("SmtpServerPort", emailSettings.SmtpSettings.SmtpServerPort),
             ("SmtpUserName", emailSettings.SmtpSettings.SmtpUserName),
             ("EmailDisplayName", emailSettings.EmailDisplayName),
-            ("EnableTls", emailSettings.SmtpSettings.EnableTls)
+            ("SocketOptions", emailSettings.SmtpSettings.SocketOptions)
         )
         .BuildMessage([toAddress]);
 

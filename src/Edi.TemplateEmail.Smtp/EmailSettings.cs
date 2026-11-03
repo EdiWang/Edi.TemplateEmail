@@ -1,3 +1,5 @@
+using MailKit.Security;
+
 namespace Edi.TemplateEmail.Smtp;
 
 public class EmailSettings
@@ -29,7 +31,10 @@ public class SmtpSettings(string smtpServer, string smtpUserName, string smtpPas
 
     public int SmtpServerPort { get; } = smtpServerPort;
 
-    public bool EnableTls { get; set; } = true;
+    /// <summary>
+    /// Connection security mode. Defaults to requiring STARTTLS; use SslOnConnect for implicit TLS.
+    /// </summary>
+    public SecureSocketOptions SocketOptions { get; set; } = SecureSocketOptions.StartTls;
 
     /// <summary>
     /// Skips TLS certificate validation. Should only be used in development environments.

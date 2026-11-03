@@ -9,7 +9,7 @@ Smtp Server: {SmtpServer.Value}<br />
 Smtp Port: {SmtpServerPort.Value}<br />
 Smtp Username: {SmtpUserName.Value}<br />
 Email Display Name: {EmailDisplayName.Value}<br />
-Enable TLS: {EnableTls.Value}<br />
+SMTP security: {SocketOptions.Value}<br />
       ]]>
         </MessageBody>
     </MailMessage>

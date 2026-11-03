@@ -1,4 +1,3 @@
-using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
 using System;
@@ -52,7 +51,7 @@ public static class SmtpExtensions
         await smtp.ConnectAsync(
             settings.SmtpSettings.SmtpServer,
             settings.SmtpSettings.SmtpServerPort,
-            settings.SmtpSettings.EnableTls ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto,
+            settings.SmtpSettings.SocketOptions,
             cancellationToken);
         if (!string.IsNullOrEmpty(settings.SmtpSettings.SmtpUserName))
         {
