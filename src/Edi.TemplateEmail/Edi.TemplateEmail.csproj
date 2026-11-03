@@ -1,22 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net10.0</TargetFrameworks>
-		<Version>2026.4.3</Version>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Company>edi.wang</Company>
-		<Authors>Edi Wang</Authors>
 		<Description>Write email template in xml and build email messages</Description>
 		<PackageTags>Email Template</PackageTags>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://edi.wang</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/EdiWang/Edi.TemplateEmail</RepositoryUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<Copyright>(c) 2026 edi.wang@outlook.com</Copyright>
-		<SignAssembly>true</SignAssembly>
-		<PackageIcon>edi-logo-blue.png</PackageIcon>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\img\edi-logo-blue.png" Pack="true" PackagePath="\" />
-	</ItemGroup>
 </Project>
