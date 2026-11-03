@@ -26,7 +26,7 @@ public class EmailHelper : IEmailHelper
         }
 
         var serializer = new XmlSerializer(typeof(MailConfiguration));
-        using var fileStream = new FileStream(configPath, FileMode.Open);
+        using var fileStream = File.OpenRead(configPath);
         _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
     }
 

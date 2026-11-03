@@ -62,6 +62,46 @@ public class EmailHelperTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_WithReadOnlyConfigFile_ShouldLoadTemplate()
+    {
+        // Arrange
+        var originalAttributes = File.GetAttributes(_testConfigPath);
+        File.SetAttributes(_testConfigPath, originalAttributes | FileAttributes.ReadOnly);
+
+        try
+        {
+            // Act
+            var message = new EmailHelper(_testConfigPath)
+                .ForType("TestMail")
+                .Map("MachineName", "TestMachine")
+                .BuildMessage(["test@example.com"]);
+
+            // Assert
+            Assert.Equal("Test Subject: TestMachine", message.Subject);
+        }
+        finally
+        {
+            File.SetAttributes(_testConfigPath, originalAttributes);
+        }
+    }
+
+    [Fact]
+    public void Constructor_WithConfigFileOpenForReading_ShouldLoadTemplate()
+    {
+        // Arrange
+        using var reader = File.OpenRead(_testConfigPath);
+
+        // Act
+        var message = new EmailHelper(_testConfigPath)
+            .ForType("TestMail")
+            .Map("MachineName", "TestMachine")
+            .BuildMessage(["test@example.com"]);
+
+        // Assert
+        Assert.Equal("Test Subject: TestMachine", message.Subject);
+    }
+
+    [Fact]
     public void Constructor_WithNullConfigPath_ShouldThrowArgumentNullException()
     {
         // Act & Assert
