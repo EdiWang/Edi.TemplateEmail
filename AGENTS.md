@@ -50,14 +50,15 @@ Preserve these behaviors unless the task explicitly changes them, and cover inte
 - Tokens use `{Entity.Property}`, with both parts matching `\w+`. `Value` is reserved for the whole mapped value's `ToString()`, even when the object has a property named `Value`. Strings return the same value for any property name. Values without public properties fall back to `ToString()`; other objects resolve public, readable, non-indexed instance properties by name. Missing entities/properties, unsupported properties, and null mapped/property values become an empty string. Exceptions from readable getters propagate.
 - Template selection matches `MessageType` exactly, prefers a case-insensitive match for `CultureInfo.CurrentCulture.Name`, and otherwise falls back to the first matching message type.
 - SMTP operations remain extensions on `CommonMailMessage`. Preserve MIME mapping of sender, from address, subject, recipients, optional CC, and HTML/plain text body.
-- `SendAsync` stays asynchronous, propagates cancellation, authenticates only when a user name is present, and disconnects cleanly.
+- `SendAsync` stays asynchronous, propagates caller cancellation during connection/authentication/sending, and authenticates only when a user name is present. Cleanup attempts a graceful disconnect for connected clients without the caller's cancellation token and always attempts disposal.
+- Disconnect/disposal failures must not replace a successful send response or the original operation exception, including cancellation. Do not add automatic retries; SMTP failures can leave acceptance uncertain.
 - `SkipCertificateValidation` is a development-only escape hatch. Keep it disabled by default and do not broaden the bypass.
 
 ## Tests
 
 - Use xUnit v3 `[Fact]` tests with the existing Arrange / Act / Assert style.
 - Add or update focused tests for changes to template selection, token formatting, XML serialization, recipient validation, MIME conversion, DI registration, or SMTP settings.
-- Keep tests local: no real email, SMTP credentials, or network-dependent tests. Validate SMTP conversion and configuration without sending.
+- Keep tests local: no real email, SMTP credentials, or network-dependent tests. Validate SMTP conversion and configuration locally; use a replaceable SMTP client for delivery and cleanup tests.
 - Use temporary files for XML file tests and clean them up with `IDisposable` or equivalent cleanup.
 
 ## Documentation and packaging

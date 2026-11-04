@@ -39,21 +39,7 @@ Relevant files: `src/Edi.TemplateEmail/EmailHelper.cs`,
 `src/Edi.TemplateEmail.Smtp/ServiceCollectionExtensions.cs`,
 `src/Edi.TemplateEmail.Smtp/SmtpExtensions.cs`.
 
-## Issue 3: Separate SMTP delivery results from cleanup failures
-
-- [ ] Define the delivery result when SMTP accepts a message but disconnecting
-  fails or cancellation occurs afterward, so cleanup failures do not cause callers
-  to retry an accepted message.
-- [ ] Ensure cleanup does not replace an established delivery result or hide the
-  original send/authentication exception. Preserve asynchronous operation and
-  cancellation of actual sending work.
-- [ ] Add a minimal replaceable SMTP-client boundary for local tests covering
-  accepted-send/disconnect-failure, send failure, and cancellation. Do not add
-  automatic retries; SMTP delivery can still have an uncertain outcome.
-
-Relevant file: `src/Edi.TemplateEmail.Smtp/SmtpExtensions.cs`.
-
-## Issue 4: Select and format templates with an explicit culture
+## Issue 3: Select and format templates with an explicit culture
 
 - [ ] Accept the recipient's culture explicitly for template selection and
   formatting.
@@ -70,13 +56,13 @@ Relevant files: `src/Edi.TemplateEmail/TemplateMailMessage.cs`,
 `src/Edi.TemplateEmail/IEmailBuilder.cs`,
 `src/Edi.TemplateEmail/IEmailHelper.cs`.
 
-## Issue 5: Use cross-platform template paths
+## Issue 4: Use cross-platform template paths
 
 - [ ] Replace manual backslash path construction in README.md and
   `src/Edi.TemplateEmail.TestConsole/Program.cs` with `Path.Combine` and document
   the expected template location for cross-platform use.
 
-## Issue 6: Reuse DI template configuration when justified by performance
+## Issue 5: Reuse DI template configuration when justified by performance
 
 - [ ] If repeated XML parsing has a measurable performance cost, load a reusable
   configuration snapshot for DI-created helpers while keeping builders independent.

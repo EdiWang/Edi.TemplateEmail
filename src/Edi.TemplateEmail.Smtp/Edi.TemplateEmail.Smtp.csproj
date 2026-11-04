@@ -10,4 +10,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Edi.TemplateEmail\Edi.TemplateEmail.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="Edi.TemplateEmail.Tests" />
+	</ItemGroup>
 </Project>

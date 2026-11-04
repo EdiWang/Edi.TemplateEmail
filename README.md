@@ -111,6 +111,14 @@ var message = emailHelper.ForType("TestMail")
 var result = await message.SendAsync(emailSettings);
 ```
 
+### SMTP results and cancellation
+
+`SendAsync` returns the SMTP server's final response after MailKit completes sending. See the [MailKit SendAsync documentation](https://mimekit.net/docs/html/M_MailKit_Net_Smtp_SmtpClient_SendAsync_1.htm). A successful result records server acceptance; downstream delivery can still fail.
+
+The cancellation token applies to connection, authentication, and sending. After a successful send, later cancellation, disconnect errors, and disposal errors do not change the returned response. Cleanup attempts a graceful disconnect for a connected client with `CancellationToken.None` and always attempts disposal. Cleanup exceptions are suppressed so they cannot hide the original connection, authentication, conversion, or send exception, including cancellation.
+
+When upgrading, treat a successful return as SMTP acceptance even if the caller's token has since been canceled. Callers no longer receive disconnect or disposal exceptions from this method. Review retry policies for send failures or cancellation: the server may have accepted the message before the connection failed, leaving the outcome uncertain. The library does not retry automatically.
+
 ### Independent message builders
 
 `EmailHelper` holds reusable template configuration. Each `ForType(...)` call returns a fresh `IEmailBuilder` with its own mappings; template selection and engine creation happen when `BuildMessage(...)` is called. Builders from the same helper can be interleaved or built in parallel:
