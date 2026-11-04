@@ -20,20 +20,21 @@ Relevant files: `src/Edi.TemplateEmail/TemplateEngine.cs`,
 
 ## Issue 2: Give each message its own builder state
 
-- [ ] Separate reusable template configuration from per-message state.
-  `ForType()` currently resets the same helper and returns it, so interleaved
-  chains for Alice and Bob can build Alice's message using Bob's mappings.
-- [ ] Return a fresh builder for each `ForType()` call and keep mutable engine
+- [x] Separate reusable template configuration from per-message state.
+  Previously, `ForType()` reset the same helper and returned it, so interleaved
+  chains for Alice and Bob could build Alice's message using Bob's mappings.
+- [x] Return a fresh builder for each `ForType()` call and keep mutable engine
   and pipeline details internal. Preserve deferred engine creation until build.
-- [ ] Snapshot recipient collections when building a message so later changes to
+- [x] Snapshot recipient collections when building a message so later changes to
   the caller's arrays cannot change its delivery targets.
-- [ ] Test interleaved builders, parallel independent builds, and recipient-array
+- [x] Test interleaved builders, parallel independent builds, and recipient-array
   mutation. Update public interfaces, DI registration, examples, and migration
   guidance together.
 
 Relevant files: `src/Edi.TemplateEmail/EmailHelper.cs`,
 `src/Edi.TemplateEmail/IEmailHelper.cs`,
-`src/Edi.TemplateEmail/CommonMailMessage.cs`,
+`src/Edi.TemplateEmail/EmailBuilder.cs`,
+`src/Edi.TemplateEmail/IEmailBuilder.cs`,
 `src/Edi.TemplateEmail.Smtp/ServiceCollectionExtensions.cs`.
 
 ## Issue 3: Report configuration and input errors before sending
@@ -80,7 +81,7 @@ coverage below are complete.
 - [x] Require successful tests before either NuGet package is published. Use:
   `dotnet test --project src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release`.
 - [x] Cover both DI registration overloads, helper lifetime/state isolation,
-  `ForType()` reset behavior, unknown template types, and the literal XML shape
+  `ForType()` fresh-builder behavior, unknown template types, and the literal XML shape
   using hand-written XML rather than only serializer-generated fixtures.
 
 Ongoing requirement: add regression tests alongside each remaining fix in its

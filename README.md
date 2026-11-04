@@ -111,6 +111,51 @@ var message = emailHelper.ForType("TestMail")
 var result = await message.SendAsync(emailSettings);
 ```
 
+### Independent message builders
+
+`EmailHelper` holds reusable template configuration. Each `ForType(...)` call returns a fresh `IEmailBuilder` with its own mappings; template selection and engine creation happen when `BuildMessage(...)` is called. Builders from the same helper can be interleaved or built in parallel:
+
+```csharp
+var aliceBuilder = emailHelper.ForType("TestMail").Map("MachineName", "Alice");
+var bobBuilder = emailHelper.ForType("TestMail").Map("MachineName", "Bob");
+
+var bobMessage = bobBuilder.BuildMessage(["bob@example.com"]);
+var aliceMessage = aliceBuilder.BuildMessage(["alice@example.com"]);
+```
+
+Each builder is mutable. Use a separate builder for each message and do not modify or build the same builder concurrently. Configuration and mapped objects are shared by reference; do not mutate them during concurrent builds. `BuildMessage` copies the To and CC arrays, so later changes to the caller's arrays do not change a built message. `CommonMailMessage` itself remains mutable.
+
+#### Migrating existing callers
+
+This is a breaking API change and consumers must recompile. `IEmailHelper` now exposes only `ForType`, which returns `IEmailBuilder`; `Map`, `MapRange`, and `BuildMessage` belong to that builder. Existing chained `ForType(...).Map(...).BuildMessage(...)` calls keep the same source syntax. For separate statements, capture the builder instead of discarding the result of `ForType`:
+
+```csharp
+IEmailBuilder builder = emailHelper.ForType("TestMail");
+builder.Map("MachineName", Environment.MachineName);
+var message = builder.BuildMessage([toAddress]);
+```
+
+`ForType` no longer resets an existing builder. Start another message with `emailHelper.ForType(...)`. The helper's public `Engine` and `Pipeline` properties have been removed; use builder mappings rather than modifying rendering state directly. Update custom `IEmailHelper` implementations to return independent `IEmailBuilder` instances. To change a built message's recipients intentionally, modify that message rather than the original input arrays.
+
+### Dependency injection
+
+Register SMTP settings and the helper using `AddTemplateEmail` from the SMTP package:
+
+```csharp
+using Edi.TemplateEmail;
+using Edi.TemplateEmail.Smtp;
+using Microsoft.Extensions.DependencyInjection;
+
+services.AddTemplateEmail(configSource, settings =>
+{
+    settings.FromAddress = fromAddress;
+    settings.EmailDisplayName = displayName;
+    settings.SmtpSettings = new(smtpServer, userName, password, port);
+});
+```
+
+Inject `IEmailHelper` and call `ForType` for each message; do not register or reuse an `IEmailBuilder` as a shared service. Both registration overloads keep `IEmailHelper` transient and `EmailSettings` singleton. The file-path overload reads XML when each helper is resolved and that helper reuses its loaded configuration for subsequent builders. The `MailConfiguration` overload uses the supplied configuration instance. No configuration cache or automatic reload is introduced.
+
 ### Token values
 
 Tokens use `{Entity.Property}` with case-sensitive names. Map an entity before calling `BuildMessage`:

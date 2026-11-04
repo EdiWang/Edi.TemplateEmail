@@ -2,10 +2,8 @@
 
 public interface IEmailHelper
 {
-    TemplateEngine Engine { get; }
-
-    IEmailHelper ForType(string mailType);
-    IEmailHelper Map(string name, object value);
-    IEmailHelper MapRange(params (string name, object value)[] values);
-    CommonMailMessage BuildMessage(string[] receipts, string[] ccReceipts = null);
+    /// <summary>
+    /// Creates an independent builder. Template selection is deferred until BuildMessage.
+    /// </summary>
+    IEmailBuilder ForType(string mailType);
 }

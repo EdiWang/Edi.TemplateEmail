@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Registers <see cref="IEmailHelper"/> and <see cref="EmailSettings"/> for use with SMTP sending.
+    /// Helpers are transient; each ForType call creates an independent message builder.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configPath">Path to the XML mail configuration file.</param>
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers <see cref="IEmailHelper"/> and <see cref="EmailSettings"/> using an existing <see cref="MailConfiguration"/>.
+    /// Helpers are transient; builders share the supplied configuration but keep their mappings separate.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="mailConfiguration">The mail configuration instance.</param>

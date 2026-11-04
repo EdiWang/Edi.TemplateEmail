@@ -4,7 +4,7 @@
 
 These instructions apply to the entire repository. This .NET 10 library ships as two NuGet packages:
 
-- `src/Edi.TemplateEmail/`: XML template loading, token mapping, fluent `EmailHelper` API, and `CommonMailMessage`.
+- `src/Edi.TemplateEmail/`: XML template loading, token mapping, reusable `EmailHelper`, independent `IEmailBuilder` API, and `CommonMailMessage`.
 - `src/Edi.TemplateEmail.Smtp/`: SMTP settings, dependency injection registration, MIME conversion, and sending via MailKit/MimeKit.
 - `src/Edi.TemplateEmail.Tests/`: xUnit v3 tests for both packages.
 - `src/Edi.TemplateEmail.TestConsole/`: interactive sample that can send real email; do not use it as an automated test.
@@ -44,8 +44,8 @@ dotnet pack src/Edi.TemplateEmail.Smtp/Edi.TemplateEmail.Smtp.csproj --configura
 
 Preserve these behaviors unless the task explicitly changes them, and cover intentional changes with tests:
 
-- Builder order is `ForType(...)`, then `Map(...)`/`MapRange(...)`, then `BuildMessage(...)`. `ForType` resets the pipeline; engine creation stays deferred until `BuildMessage`.
-- `BuildMessage` requires recipients, formats and trims subject/body, and copies the template's HTML flag.
+- Builder order is `IEmailHelper.ForType(...)`, then `IEmailBuilder.Map(...)`/`MapRange(...)`, then `BuildMessage(...)`. Each `ForType` returns a fresh builder without changing existing builders. Engine and pipeline state are not exposed by helpers or builders; engine creation stays deferred until `BuildMessage`.
+- `BuildMessage` requires recipients, formats and trims subject/body, copies the template's HTML flag, and snapshots To/CC arrays. Separate builders support concurrent builds while configuration and mapped objects are not being mutated; a single mutable builder is not intended for concurrent use.
 - XML uses the `MailConfiguration` root with `MailMessage` entries. `MessageType` and `IsHtml` are attributes; `MessageSubject`, `MessageBody`, and `MessageCulture` are elements. Preserve this serialized shape.
 - Tokens use `{Entity.Property}`, with both parts matching `\w+`. `Value` is reserved for the whole mapped value's `ToString()`, even when the object has a property named `Value`. Strings return the same value for any property name. Values without public properties fall back to `ToString()`; other objects resolve public, readable, non-indexed instance properties by name. Missing entities/properties, unsupported properties, and null mapped/property values become an empty string. Exceptions from readable getters propagate.
 - Template selection matches `MessageType` exactly, prefers a case-insensitive match for `CultureInfo.CurrentCulture.Name`, and otherwise falls back to the first matching message type.

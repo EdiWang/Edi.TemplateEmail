@@ -40,25 +40,27 @@ public class EmailHelperTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WithConfiguration_ShouldSetProperties()
+    public void Constructor_WithConfiguration_ShouldLoadTemplate()
     {
         // Act
         var emailHelper = new EmailHelper(_testMailConfiguration);
+        var message = emailHelper.ForType("TestMail").Map("MachineName", "Alice")
+            .BuildMessage(["alice@example.com"]);
 
         // Assert
-        Assert.Null(emailHelper.Engine);
-        Assert.Null(emailHelper.Pipeline);
+        Assert.Equal("Test Subject: Alice", message.Subject);
     }
 
     [Fact]
-    public void Constructor_WithConfigPath_ShouldSetProperties()
+    public void Constructor_WithConfigPath_ShouldLoadTemplate()
     {
         // Act
         var emailHelper = new EmailHelper(_testConfigPath);
+        var message = emailHelper.ForType("TestMail").Map("MachineName", "Alice")
+            .BuildMessage(["alice@example.com"]);
 
         // Assert
-        Assert.Null(emailHelper.Engine);
-        Assert.Null(emailHelper.Pipeline);
+        Assert.Equal("Test Subject: Alice", message.Subject);
     }
 
     [Fact]
@@ -173,7 +175,7 @@ public class EmailHelperTests : IDisposable
     }
 
     [Fact]
-    public void ForType_ShouldSetMailTypeAndCreatePipeline()
+    public void ForType_ShouldCreateFreshBuilders()
     {
         // Arrange
         var emailHelper = new EmailHelper(_testMailConfiguration);
@@ -183,12 +185,11 @@ public class EmailHelperTests : IDisposable
         var result = emailHelper.ForType(mailType);
 
         // Assert
-        Assert.Same(emailHelper, result); // Should return self for fluent interface
-        Assert.NotNull(emailHelper.Pipeline);
+        Assert.NotSame(result, emailHelper.ForType(mailType));
     }
 
     [Fact]
-    public void ForType_AfterBuild_ShouldResetMappingsAndDeferEngineCreation()
+    public void ForType_AfterBuild_ShouldStartWithFreshMappings()
     {
         // Arrange
         _testMailConfiguration.MailMessages.Add(new MailMessageConfiguration
@@ -198,26 +199,20 @@ public class EmailHelperTests : IDisposable
             MessageBody = "Other body: {SmtpServer.Value}"
         });
         var helper = new EmailHelper(_testMailConfiguration);
-        helper.ForType("TestMail")
+        var firstBuilder = helper.ForType("TestMail")
             .Map("MachineName", "Alice")
-            .Map("SmtpServer", "old.example.com")
-            .BuildMessage(["alice@example.com"]);
-        var previousPipeline = helper.Pipeline;
-        Assert.NotNull(helper.Engine);
+            .Map("SmtpServer", "old.example.com");
+        firstBuilder.BuildMessage(["alice@example.com"]);
 
         // Act
-        helper.ForType("OtherMail");
+        var secondBuilder = helper.ForType("OtherMail").Map("MachineName", "Bob");
+        var message = secondBuilder.BuildMessage(["bob@example.com"]);
 
         // Assert
-        Assert.NotSame(previousPipeline, helper.Pipeline);
-        Assert.False(helper.Pipeline.HasEntity("MachineName"));
-        Assert.False(helper.Pipeline.HasEntity("SmtpServer"));
-        Assert.Null(helper.Engine);
-        helper.Map("MachineName", "Bob");
-        Assert.Null(helper.Engine);
-        var message = helper.BuildMessage(["bob@example.com"]);
         Assert.Equal("Other: Bob", message.Subject);
         Assert.Equal("Other body:", message.Body);
+        Assert.Equal("Test Body: Alice - old.example.com",
+            firstBuilder.BuildMessage(["alice@example.com"]).Body);
     }
 
     [Fact]
@@ -225,52 +220,39 @@ public class EmailHelperTests : IDisposable
     {
         // Arrange
         var helper = new EmailHelper(_testMailConfiguration);
-        helper.ForType("UnknownMail").Map("MachineName", "Alice");
-        Assert.Null(helper.Engine);
+        var builder = helper.ForType("UnknownMail").Map("MachineName", "Alice");
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
-            helper.BuildMessage(["alice@example.com"]));
+            builder.BuildMessage(["alice@example.com"]));
 
         // Assert
         Assert.Equal("Mail type 'UnknownMail' was not found in the mail configuration.", exception.Message);
-        Assert.Null(helper.Engine);
     }
 
     [Fact]
-    public void Map_ShouldAddValueToPipeline()
+    public void Map_ShouldAddValueAndReturnBuilder()
     {
         // Arrange
         var emailHelper = new EmailHelper(_testMailConfiguration);
-        emailHelper.ForType("TestMail");
-        const string name = "TestName";
+        var builder = emailHelper.ForType("TestMail");
+        const string name = "MachineName";
         const string value = "TestValue";
 
         // Act
-        var result = emailHelper.Map(name, value);
+        var result = builder.Map(name, value);
 
         // Assert
-        Assert.Same(emailHelper, result); // Should return self for fluent interface
-        Assert.True(emailHelper.Pipeline.HasEntity(name));
-        Assert.Equal(value, emailHelper.Pipeline[name].Value);
+        Assert.Same(builder, result);
+        Assert.Equal("Test Subject: TestValue", result.BuildMessage(["test@example.com"]).Subject);
     }
 
     [Fact]
-    public void Map_WithoutForType_ShouldThrowInvalidOperationException()
+    public void MapRange_ShouldAddMultipleValuesAndReturnBuilder()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => emailHelper.Map("TestName", "TestValue"));
-    }
-
-    [Fact]
-    public void MapRange_ShouldAddMultipleValuesToPipeline()
-    {
-        // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-        emailHelper.ForType("TestMail");
+        _testMailConfiguration.MailMessages[0].MessageSubject = "{Name1.Value}|{Name2.Value}|{Name3.Value}";
+        var builder = new EmailHelper(_testMailConfiguration).ForType("TestMail");
         var values = new (string name, object value)[]
         {
             ("Name1", "Value1"),
@@ -279,40 +261,24 @@ public class EmailHelperTests : IDisposable
         };
 
         // Act
-        var result = emailHelper.MapRange(values);
+        var result = builder.MapRange(values);
 
         // Assert
-        Assert.Same(emailHelper, result); // Should return self for fluent interface
-        Assert.True(emailHelper.Pipeline.HasEntity("Name1"));
-        Assert.True(emailHelper.Pipeline.HasEntity("Name2"));
-        Assert.True(emailHelper.Pipeline.HasEntity("Name3"));
-        Assert.Equal("Value1", emailHelper.Pipeline["Name1"].Value);
-        Assert.Equal(42, emailHelper.Pipeline["Name2"].Value);
-        Assert.Equal(true, emailHelper.Pipeline["Name3"].Value);
+        Assert.Same(builder, result);
+        Assert.Equal("Value1|42|True", result.BuildMessage(["test@example.com"]).Subject);
     }
 
     [Fact]
     public void MapRange_WithNoValues_ShouldReturnSelf()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-        emailHelper.ForType("TestMail");
+        var builder = new EmailHelper(_testMailConfiguration).ForType("TestMail");
 
         // Act
-        var result = emailHelper.MapRange();
+        var result = builder.MapRange();
 
         // Assert
-        Assert.Same(emailHelper, result);
-    }
-
-    [Fact]
-    public void MapRange_WithoutForType_ShouldThrowInvalidOperationException()
-    {
-        // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => emailHelper.MapRange(("TestName", "TestValue")));
+        Assert.Same(builder, result);
     }
 
     [Fact]
@@ -323,18 +289,20 @@ public class EmailHelperTests : IDisposable
         var receipts = new[] { "test1@example.com", "test2@example.com" };
         var ccReceipts = new[] { "cc1@example.com" };
 
-        emailHelper.ForType("TestMail")
+        var builder = emailHelper.ForType("TestMail")
                   .Map("MachineName", Environment.MachineName)
                   .Map("SmtpServer", "smtp.test.com");
 
         // Act
-        var result = emailHelper.BuildMessage(receipts, ccReceipts);
+        var result = builder.BuildMessage(receipts, ccReceipts);
 
         // Assert
         Assert.NotNull(result);
         Assert.IsType<CommonMailMessage>(result);
-        Assert.Same(receipts, result.Receipts);
-        Assert.Same(ccReceipts, result.CcReceipts);
+        Assert.NotSame(receipts, result.Receipts);
+        Assert.Equal(receipts, result.Receipts);
+        Assert.NotSame(ccReceipts, result.CcReceipts);
+        Assert.Equal(ccReceipts, result.CcReceipts);
         Assert.NotNull(result.Subject);
         Assert.NotNull(result.Body);
         Assert.True(result.BodyIsHtml);
@@ -347,16 +315,17 @@ public class EmailHelperTests : IDisposable
         var emailHelper = new EmailHelper(_testMailConfiguration);
         var receipts = new[] { "test@example.com" };
 
-        emailHelper.ForType("TestMail")
+        var builder = emailHelper.ForType("TestMail")
                   .Map("MachineName", Environment.MachineName)
                   .Map("SmtpServer", "smtp.test.com");
 
         // Act
-        var result = emailHelper.BuildMessage(receipts);
+        var result = builder.BuildMessage(receipts);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Same(receipts, result.Receipts);
+        Assert.NotSame(receipts, result.Receipts);
+        Assert.Equal(receipts, result.Receipts);
         Assert.Null(result.CcReceipts);
     }
 
@@ -364,32 +333,20 @@ public class EmailHelperTests : IDisposable
     public void BuildMessage_WithNullReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-        emailHelper.ForType("TestMail");
+        var builder = new EmailHelper(_testMailConfiguration).ForType("TestMail");
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => emailHelper.BuildMessage(null));
-    }
-
-    [Fact]
-    public void BuildMessage_WithoutForType_ShouldThrowInvalidOperationException()
-    {
-        // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => emailHelper.BuildMessage(["test@example.com"]));
+        Assert.Throws<ArgumentNullException>(() => builder.BuildMessage(null));
     }
 
     [Fact]
     public void BuildMessage_WithEmptyReceipts_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-        emailHelper.ForType("TestMail");
+        var builder = new EmailHelper(_testMailConfiguration).ForType("TestMail");
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => emailHelper.BuildMessage(new string[0]));
+        Assert.Throws<ArgumentNullException>(() => builder.BuildMessage([]));
     }
 
     [Fact]
@@ -412,28 +369,30 @@ public class EmailHelperTests : IDisposable
         // Assert
         Assert.NotNull(result);
         Assert.IsType<CommonMailMessage>(result);
-        Assert.True(emailHelper.Pipeline.HasEntity("MachineName"));
-        Assert.True(emailHelper.Pipeline.HasEntity("SmtpServer"));
-        Assert.True(emailHelper.Pipeline.HasEntity("Port"));
+        Assert.Equal($"Test Subject: {Environment.MachineName}", result.Subject);
+        Assert.Equal($"Test Body: {Environment.MachineName} - smtp.test.com", result.Body);
     }
 
     [Fact]
-    public void Engine_ShouldBeSetAfterBuildMessage()
+    public void BuildMessage_ShouldDeferTemplateSelectionUntilBuild()
     {
         // Arrange
-        var emailHelper = new EmailHelper(_testMailConfiguration);
-        var receipts = new[] { "test@example.com" };
-
-        emailHelper.ForType("TestMail")
-                  .Map("MachineName", Environment.MachineName)
-                  .Map("SmtpServer", "smtp.test.com");
+        var configuration = new MailConfiguration();
+        var builder = new EmailHelper(configuration).ForType("DeferredMail")
+            .Map("Name", "Alice");
 
         // Act
-        emailHelper.BuildMessage(receipts);
+        configuration.MailMessages.Add(new MailMessageConfiguration
+        {
+            MessageType = "DeferredMail",
+            MessageSubject = "Hello {Name.Value}",
+            MessageBody = "Deferred body"
+        });
+        var message = builder.BuildMessage(["alice@example.com"]);
 
         // Assert
-        Assert.NotNull(emailHelper.Engine);
-        Assert.IsType<TemplateEngine>(emailHelper.Engine);
+        Assert.Equal("Hello Alice", message.Subject);
+        Assert.Equal("Deferred body", message.Body);
     }
 
     [Fact]
@@ -457,14 +416,90 @@ public class EmailHelperTests : IDisposable
         var emailHelper = new EmailHelper(configWithWhitespace);
         var receipts = new[] { "test@example.com" };
 
-        emailHelper.ForType("TestMail");
+        var builder = emailHelper.ForType("TestMail");
 
         // Act
-        var result = emailHelper.BuildMessage(receipts);
+        var result = builder.BuildMessage(receipts);
 
         // Assert
         Assert.Equal("Test Subject", result.Subject);
         Assert.Equal("Test Body", result.Body);
+    }
+
+    [Fact]
+    public void ForType_WithInterleavedBuilders_ShouldKeepMessageTypesAndMappingsIndependent()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages.Add(new MailMessageConfiguration
+        {
+            MessageType = "OtherMail",
+            MessageSubject = "Other: {MachineName.Value}",
+            MessageBody = "Server: {SmtpServer.Value}"
+        });
+        var helper = new EmailHelper(_testMailConfiguration);
+
+        // Act
+        var aliceBuilder = helper.ForType("TestMail").Map("MachineName", "Alice");
+        var bobBuilder = helper.ForType("OtherMail")
+            .MapRange(("MachineName", "Bob"), ("SmtpServer", "bob.example.com"));
+        aliceBuilder.Map("SmtpServer", "alice.example.com");
+        var bobMessage = bobBuilder.BuildMessage(["bob@example.com"]);
+        var aliceMessage = aliceBuilder.BuildMessage(["alice@example.com"]);
+
+        // Assert
+        Assert.NotSame(aliceBuilder, bobBuilder);
+        Assert.Equal("Test Subject: Alice", aliceMessage.Subject);
+        Assert.Equal("Test Body: Alice - alice.example.com", aliceMessage.Body);
+        Assert.True(aliceMessage.BodyIsHtml);
+        Assert.Equal("Other: Bob", bobMessage.Subject);
+        Assert.Equal("Server: bob.example.com", bobMessage.Body);
+        Assert.False(bobMessage.BodyIsHtml);
+    }
+
+    [Fact]
+    public async Task BuildMessage_WithParallelIndependentBuilders_ShouldKeepMappingsIndependent()
+    {
+        // Arrange
+        var helper = new EmailHelper(_testMailConfiguration);
+        var builders = Enumerable.Range(0, 16)
+            .Select(index => helper.ForType("TestMail")
+                .MapRange(("MachineName", $"Machine{index}"), ("SmtpServer", $"smtp{index}.example.com")))
+            .ToArray();
+
+        // Act
+        var messages = await Task.WhenAll(builders.Select((builder, index) =>
+            Task.Run(() => builder.BuildMessage([$"user{index}@example.com"]))));
+
+        // Assert
+        for (var index = 0; index < messages.Length; index++)
+        {
+            Assert.Equal($"Test Subject: Machine{index}", messages[index].Subject);
+            Assert.Equal($"Test Body: Machine{index} - smtp{index}.example.com", messages[index].Body);
+            Assert.Equal($"user{index}@example.com", Assert.Single(messages[index].Receipts));
+        }
+    }
+
+    [Fact]
+    public void BuildMessage_ShouldSnapshotRecipientArraysForEachMessage()
+    {
+        // Arrange
+        var builder = new EmailHelper(_testMailConfiguration).ForType("TestMail");
+        string[] receipts = ["alice@example.com"];
+        string[] ccReceipts = ["cc@example.com"];
+
+        // Act
+        var first = builder.BuildMessage(receipts, ccReceipts);
+        receipts[0] = "bob@example.com";
+        ccReceipts[0] = "other-cc@example.com";
+        var second = builder.BuildMessage(receipts, ccReceipts);
+        second.Receipts[0] = "changed@example.com";
+        second.CcReceipts[0] = "changed-cc@example.com";
+
+        // Assert
+        Assert.Equal("alice@example.com", Assert.Single(first.Receipts));
+        Assert.Equal("cc@example.com", Assert.Single(first.CcReceipts));
+        Assert.Equal("bob@example.com", Assert.Single(receipts));
+        Assert.Equal("other-cc@example.com", Assert.Single(ccReceipts));
     }
 
     [Fact]

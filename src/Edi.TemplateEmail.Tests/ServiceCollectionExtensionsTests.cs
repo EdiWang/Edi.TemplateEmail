@@ -44,10 +44,12 @@ public class ServiceCollectionExtensionsTests : IDisposable
         using var scope = provider.CreateScope();
         var first = scope.ServiceProvider.GetRequiredService<IEmailHelper>();
         var second = scope.ServiceProvider.GetRequiredService<IEmailHelper>();
-        first.ForType("Welcome").Map("Name", "Alice");
-        second.ForType("Welcome").Map("Name", "Bob");
-        var bobMessage = second.BuildMessage(["bob@example.com"]);
-        var aliceMessage = first.BuildMessage(["alice@example.com"]);
+        IEmailBuilder aliceBuilder = first.ForType("Welcome").Map("Name", "Alice");
+        var bobBuilder = first.ForType("Welcome").Map("Name", "Bob");
+        var otherBuilder = second.ForType("Welcome").Map("Name", "Other");
+        var bobMessage = bobBuilder.BuildMessage(["bob@example.com"]);
+        var aliceMessage = aliceBuilder.BuildMessage(["alice@example.com"]);
+        var otherMessage = otherBuilder.BuildMessage(["other@example.com"]);
         var settings = scope.ServiceProvider.GetRequiredService<EmailSettings>();
 
         // Assert
@@ -57,6 +59,7 @@ public class ServiceCollectionExtensionsTests : IDisposable
         Assert.Equal("Hello Alice", aliceMessage.Body);
         Assert.Equal("Welcome Bob", bobMessage.Subject);
         Assert.Equal("Hello Bob", bobMessage.Body);
+        Assert.Equal("Welcome Other", otherMessage.Subject);
         Assert.Equal("sender@example.com", settings.FromAddress);
         Assert.Same(smtpSettings, settings.SmtpSettings);
         Assert.Same(settings, provider.GetRequiredService<EmailSettings>());
@@ -94,10 +97,12 @@ public class ServiceCollectionExtensionsTests : IDisposable
         using var scope = provider.CreateScope();
         var first = scope.ServiceProvider.GetRequiredService<IEmailHelper>();
         var second = scope.ServiceProvider.GetRequiredService<IEmailHelper>();
-        first.ForType("Welcome").Map("Name", "Alice");
-        second.ForType("Welcome").Map("Name", "Bob");
-        var bobMessage = second.BuildMessage(["bob@example.com"]);
-        var aliceMessage = first.BuildMessage(["alice@example.com"]);
+        IEmailBuilder aliceBuilder = first.ForType("Welcome").Map("Name", "Alice");
+        var bobBuilder = first.ForType("Welcome").Map("Name", "Bob");
+        var otherBuilder = second.ForType("Welcome").Map("Name", "Other");
+        var bobMessage = bobBuilder.BuildMessage(["bob@example.com"]);
+        var aliceMessage = aliceBuilder.BuildMessage(["alice@example.com"]);
+        var otherMessage = otherBuilder.BuildMessage(["other@example.com"]);
         var settings = scope.ServiceProvider.GetRequiredService<EmailSettings>();
 
         // Assert
@@ -107,6 +112,7 @@ public class ServiceCollectionExtensionsTests : IDisposable
         Assert.Equal("Hello Alice", aliceMessage.Body);
         Assert.Equal("Welcome Bob", bobMessage.Subject);
         Assert.Equal("Hello Bob", bobMessage.Body);
+        Assert.Equal("Welcome Other", otherMessage.Subject);
         Assert.Equal("sender@example.com", settings.FromAddress);
         Assert.Same(smtpSettings, settings.SmtpSettings);
         Assert.Same(settings, provider.GetRequiredService<EmailSettings>());
