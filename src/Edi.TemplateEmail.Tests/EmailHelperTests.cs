@@ -26,6 +26,11 @@ public class EmailHelperTests : IDisposable
 
         // Create a temporary XML config file for testing
         _testConfigPath = Path.GetTempFileName();
+        WriteConfiguration();
+    }
+
+    private void WriteConfiguration()
+    {
         var serializer = new XmlSerializer(typeof(MailConfiguration));
         using var fileStream = new FileStream(_testConfigPath, FileMode.Create);
         serializer.Serialize(fileStream, _testMailConfiguration);
@@ -172,6 +177,207 @@ public class EmailHelperTests : IDisposable
     {
         // Act & Assert
         Assert.Throws<FileNotFoundException>(() => new EmailHelper("nonexistent.xml"));
+    }
+
+    [Fact]
+    public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => new EmailHelper((MailConfiguration)null));
+
+        // Assert
+        Assert.Equal("configuration", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_WithNullMessages_ShouldIdentifyCollection()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages = null;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testMailConfiguration));
+
+        // Assert
+        Assert.Contains("MailConfiguration.MailMessages", exception.Message);
+    }
+
+    [Fact]
+    public void Constructor_WithNullTemplate_ShouldIdentifyIndex()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages.Add(null);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testMailConfiguration));
+
+        // Assert
+        Assert.Contains("MailMessages[1]", exception.Message);
+    }
+
+    [Fact]
+    public void Constructors_WithMissingRequiredFields_ShouldIdentifyTemplateAndField()
+    {
+        // Arrange
+        var cases = new (MailMessageConfiguration Template, string Field)[]
+        {
+            (new() { MessageSubject = "", MessageBody = "", MessageCulture = "en-US" }, "MessageType"),
+            (new() { MessageType = "BrokenMail", MessageBody = "", MessageCulture = "en-US" }, "MessageSubject"),
+            (new() { MessageType = "BrokenMail", MessageSubject = "", MessageCulture = "en-US" }, "MessageBody")
+        };
+
+        foreach (var item in cases)
+        {
+            _testMailConfiguration.MailMessages = [_testMailConfiguration.MailMessages[0], item.Template];
+            WriteConfiguration();
+
+            // Act
+            var errors = new[]
+            {
+                Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testMailConfiguration)),
+                Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testConfigPath))
+            };
+
+            // Assert
+            Assert.Equal(errors[0].Message, errors[1].Message);
+            Assert.Contains("MailMessages[1]", errors[0].Message);
+            Assert.Contains($"MessageType='{item.Template.MessageType}'", errors[0].Message);
+            Assert.Contains("MessageCulture='en-US'", errors[0].Message);
+            Assert.Contains($": {item.Field} ", errors[0].Message);
+        }
+    }
+
+    [Fact]
+    public void Constructors_WithBlankMessageType_ShouldIdentifyField()
+    {
+        // Arrange
+        foreach (var messageType in new[] { "", "  " })
+        {
+            _testMailConfiguration.MailMessages[0].MessageType = messageType;
+            WriteConfiguration();
+
+            // Act
+            var objectError = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testMailConfiguration));
+            var fileError = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testConfigPath));
+
+            // Assert
+            Assert.Equal(objectError.Message, fileError.Message);
+            Assert.Contains("MailMessages[0]", objectError.Message);
+            Assert.Contains(": MessageType ", objectError.Message);
+        }
+    }
+
+    [Fact]
+    public void Constructors_WithDuplicateKeys_ShouldIdentifyTemplateAndKey()
+    {
+        // Arrange
+        var cultures = new (string First, string Second)[]
+        {
+            ("en-US", "en-US"), ("en-US", "EN-us"), (null, null), (null, ""), ("", null), ("", "")
+        };
+
+        foreach (var culture in cultures)
+        {
+            var first = _testMailConfiguration.MailMessages[0];
+            first.MessageCulture = culture.First;
+            _testMailConfiguration.MailMessages =
+            [
+                first,
+                new() { MessageType = "TestMail", MessageCulture = culture.Second, MessageSubject = "", MessageBody = "" }
+            ];
+            WriteConfiguration();
+
+            // Act
+            var objectError = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testMailConfiguration));
+            var fileError = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testConfigPath));
+
+            // Assert
+            Assert.Equal(objectError.Message, fileError.Message);
+            Assert.Contains("MailMessages[1]", objectError.Message);
+            Assert.Contains("MessageType='TestMail'", objectError.Message);
+            Assert.Contains($"MessageCulture='{culture.Second ?? ""}'", objectError.Message);
+            Assert.Contains("duplicate MessageType/MessageCulture", objectError.Message);
+        }
+    }
+
+    [Fact]
+    public void Constructors_WithDistinctCulturesAndCaseSensitiveTypes_ShouldAcceptConfiguration()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages =
+        [
+            new() { MessageType = "Mail", MessageCulture = "en-US", MessageSubject = "English", MessageBody = "" },
+            new() { MessageType = "Mail", MessageCulture = "fr-FR", MessageSubject = "French", MessageBody = "" },
+            new() { MessageType = "Mail", MessageSubject = "Default", MessageBody = "" },
+            new() { MessageType = "mail", MessageCulture = "EN-us", MessageSubject = "Lowercase type", MessageBody = "" }
+        ];
+        WriteConfiguration();
+
+        // Act
+        var helpers = new[] { new EmailHelper(_testMailConfiguration), new EmailHelper(_testConfigPath) };
+
+        // Assert
+        foreach (var helper in helpers)
+        {
+            Assert.Equal("Lowercase type", helper.ForType("mail").BuildMessage(["to@example.com"]).Subject);
+        }
+    }
+
+    [Fact]
+    public void Constructors_WithEmptyOrWhitespaceSubjectAndBody_ShouldBuildEmptyMessage()
+    {
+        // Arrange
+        foreach (var text in new[] { "", "  " })
+        {
+            _testMailConfiguration.MailMessages[0].MessageSubject = text;
+            _testMailConfiguration.MailMessages[0].MessageBody = text;
+            WriteConfiguration();
+
+            // Act
+            var messages = new[]
+            {
+                new EmailHelper(_testMailConfiguration).ForType("TestMail").BuildMessage(["to@example.com"]),
+                new EmailHelper(_testConfigPath).ForType("TestMail").BuildMessage(["to@example.com"])
+            };
+
+            // Assert
+            foreach (var message in messages)
+            {
+                Assert.Equal("", message.Subject);
+                Assert.Equal("", message.Body);
+            }
+        }
+    }
+
+    [Fact]
+    public void Constructors_WithEmptyConfiguration_ShouldDeferMissingTemplateErrorUntilBuild()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages.Clear();
+        WriteConfiguration();
+
+        // Act
+        var helpers = new[] { new EmailHelper(_testMailConfiguration), new EmailHelper(_testConfigPath) };
+
+        // Assert
+        foreach (var helper in helpers)
+        {
+            var builder = helper.ForType("MissingMail");
+            Assert.Throws<InvalidOperationException>(() => builder.BuildMessage(["to@example.com"]));
+        }
+    }
+
+    [Fact]
+    public void Constructor_WithMalformedXml_ShouldPreserveParserException()
+    {
+        // Arrange
+        File.WriteAllText(_testConfigPath, "<MailConfiguration><MailMessage");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => new EmailHelper(_testConfigPath));
+
+        // Assert
+        Assert.IsType<System.Xml.XmlException>(exception.InnerException);
     }
 
     [Fact]

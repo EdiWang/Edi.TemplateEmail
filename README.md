@@ -37,6 +37,12 @@ Place `mailConfiguration.xml` in your application's output/deployment directory,
 
 Template selection matches `MessageType` exactly, prefers a case-insensitive match between `MessageCulture` and `CultureInfo.CurrentCulture.Name`, and otherwise uses the first entry of that message type.
 
+Both `EmailHelper` constructors validate configuration when the helper is created. `MessageType` must be nonblank; `MessageSubject` and `MessageBody` must be present and non-null. Empty strings are allowed: use `<MessageSubject />` or `<MessageBody />` for intentionally empty content. `MessageCulture` remains optional, and omitted `IsHtml` still defaults to `false`. A null configuration, null `MailMessages` list, or null template entry is rejected; an empty list remains valid.
+
+Each `MessageType`/`MessageCulture` pair must be unique. Types are compared ordinally with case sensitivity; cultures use a case-insensitive invariant comparison. An omitted or empty culture represents the same key. Configuration errors identify the zero-based template index, type and culture where available, and the invalid field or duplicate key.
+
+Migration note: helpers now reject invalid configuration at construction instead of failing during message building or silently selecting the first duplicate. Null configuration throws `ArgumentNullException`; invalid fields, lists, entries, or duplicate keys throw `InvalidOperationException`. Supply missing subject/body elements and remove duplicate keys before upgrading. With DI, validation occurs when `IEmailHelper` is resolved. Validation does not copy or freeze the configuration or revalidate later mutations; keep subsequent edits valid. Template selection and engine creation remain deferred until `BuildMessage`.
+
 ## Build a message
 
 ```csharp

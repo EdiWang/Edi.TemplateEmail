@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
@@ -10,6 +11,7 @@ public class EmailHelper : IEmailHelper
 
     public EmailHelper(MailConfiguration configuration)
     {
+        ValidateConfiguration(configuration);
         _mailConfiguration = configuration;
     }
 
@@ -23,10 +25,54 @@ public class EmailHelper : IEmailHelper
         var serializer = new XmlSerializer(typeof(MailConfiguration));
         using var fileStream = File.OpenRead(configPath);
         _mailConfiguration = (MailConfiguration)serializer.Deserialize(fileStream);
+        ValidateConfiguration(_mailConfiguration);
     }
 
     public IEmailBuilder ForType(string mailType)
     {
         return new EmailBuilder(_mailConfiguration, mailType);
+    }
+
+    private static void ValidateConfiguration(MailConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+        if (configuration.MailMessages is null)
+        {
+            throw new InvalidOperationException("MailConfiguration.MailMessages must not be null.");
+        }
+
+        var culturesByType = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        for (var index = 0; index < configuration.MailMessages.Count; index++)
+        {
+            var template = configuration.MailMessages[index];
+            if (template is null)
+            {
+                throw new InvalidOperationException($"MailMessages[{index}] must not be null.");
+            }
+
+            var location = $"MailMessages[{index}] (MessageType='{template.MessageType}', MessageCulture='{template.MessageCulture ?? ""}')";
+            if (string.IsNullOrWhiteSpace(template.MessageType))
+            {
+                throw new InvalidOperationException($"{location}: MessageType must not be null, empty, or whitespace.");
+            }
+            if (template.MessageSubject is null)
+            {
+                throw new InvalidOperationException($"{location}: MessageSubject is required; use an empty string for an empty subject.");
+            }
+            if (template.MessageBody is null)
+            {
+                throw new InvalidOperationException($"{location}: MessageBody is required; use an empty string for an empty body.");
+            }
+
+            if (!culturesByType.TryGetValue(template.MessageType, out var cultures))
+            {
+                cultures = new(StringComparer.InvariantCultureIgnoreCase);
+                culturesByType.Add(template.MessageType, cultures);
+            }
+            if (!cultures.Add(template.MessageCulture ?? ""))
+            {
+                throw new InvalidOperationException($"{location}: duplicate MessageType/MessageCulture key.");
+            }
+        }
     }
 }

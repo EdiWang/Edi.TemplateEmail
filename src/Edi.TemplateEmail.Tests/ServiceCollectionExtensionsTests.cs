@@ -67,6 +67,40 @@ public class ServiceCollectionExtensionsTests : IDisposable
     }
 
     [Fact]
+    public void AddTemplateEmail_WithInvalidConfiguration_ShouldValidateWhenHelperIsResolved()
+    {
+        // Arrange
+        File.WriteAllText(_testConfigPath, """
+            <MailConfiguration>
+              <MailMessage MessageType="BrokenMail">
+                <MessageBody>Body</MessageBody>
+              </MailMessage>
+            </MailConfiguration>
+            """);
+        var configuration = new MailConfiguration
+        {
+            MailMessages = [new() { MessageType = "BrokenMail", MessageBody = "Body" }]
+        };
+        var servicesFromFile = new ServiceCollection();
+        var servicesFromObject = new ServiceCollection();
+        servicesFromFile.AddTemplateEmail(_testConfigPath, _ => { });
+        servicesFromObject.AddTemplateEmail(configuration, _ => { });
+
+        foreach (var services in new[] { servicesFromFile, servicesFromObject })
+        {
+            using var provider = services.BuildServiceProvider();
+
+            // Act
+            var exception = Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<IEmailHelper>());
+
+            // Assert
+            Assert.Contains("MailMessages[0]", exception.Message);
+            Assert.Contains("MessageType='BrokenMail'", exception.Message);
+            Assert.Contains(": MessageSubject ", exception.Message);
+        }
+    }
+
+    [Fact]
     public void AddTemplateEmail_WithConfiguration_ShouldRegisterIsolatedTransientHelpersAndSingletonSettings()
     {
         // Arrange

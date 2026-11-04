@@ -7,7 +7,7 @@ run the interactive console as an automated test.
 
 ## Issue 1: Report configuration and input errors before sending
 
-- [ ] Validate template configuration at load time, including missing required
+- [x] Validate template configuration at load time, including missing required
   fields and duplicate message-type/culture keys. Identify the template and field
   in validation errors.
 - [ ] In a breaking release, reject unknown token entities/properties with useful
