@@ -1,14 +1,15 @@
-name: .NET build and pack
+name: .NET build, test and publish
 
 on:
   push:
     branches: [ master ]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    permissions:
-      id-token: write  # enable GitHub OIDC token issuance for this job
-
     runs-on: ubuntu-latest
 
     steps:
@@ -17,12 +18,27 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
-    - name: Build Edi.TemplateEmail
-      run: dotnet build --configuration Release
-      working-directory: ./src/Edi.TemplateEmail
-    - name: Build Edi.TemplateEmail.Smtp
-      run: dotnet build --configuration Release
-      working-directory: ./src/Edi.TemplateEmail.Smtp
+    - name: Build solution
+      run: dotnet build src/Edi.TemplateEmail.slnx --configuration Release
+    - name: Test
+      run: dotnet test --project src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+    - name: Build solution
+      run: dotnet build src/Edi.TemplateEmail.slnx --configuration Release
     - name: Pack Edi.TemplateEmail
       run: dotnet pack --configuration Release -o nupkg
       working-directory: ./src/Edi.TemplateEmail
@@ -35,8 +51,8 @@ jobs:
       with:
         user: ${{secrets.NUGET_USER}}
     - name: Push Edi.TemplateEmail
-      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
+      run: dotnet nuget push "nupkg/*.nupkg" -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
       working-directory: ./src/Edi.TemplateEmail
     - name: Push Edi.TemplateEmail.Smtp
-      run: dotnet nuget push **\*.nupkg -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
+      run: dotnet nuget push "nupkg/*.nupkg" -s 'https://api.nuget.org/v3/index.json' --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
       working-directory: ./src/Edi.TemplateEmail.Smtp

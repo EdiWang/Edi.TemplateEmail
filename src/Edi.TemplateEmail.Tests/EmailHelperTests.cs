@@ -62,6 +62,49 @@ public class EmailHelperTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_WithHandWrittenXml_ShouldLoadSerializedShape()
+    {
+        // Arrange
+        File.WriteAllText(_testConfigPath, """
+            <MailConfiguration>
+              <MailMessage MessageType="PlainMail" IsHtml="false">
+                <MessageSubject>Plain subject</MessageSubject>
+                <MessageBody>Plain body</MessageBody>
+                <MessageCulture>fr-FR</MessageCulture>
+              </MailMessage>
+              <MailMessage MessageType="HtmlMail" IsHtml="true">
+                <MessageSubject>Welcome {Name.Value}</MessageSubject>
+                <MessageBody><![CDATA[<p>Hello {Name.Value}</p>]]></MessageBody>
+                <MessageCulture>en-US</MessageCulture>
+              </MailMessage>
+            </MailConfiguration>
+            """);
+
+        // Act
+        MailConfiguration configuration;
+        using (var stream = File.OpenRead(_testConfigPath))
+        {
+            configuration = (MailConfiguration)new XmlSerializer(typeof(MailConfiguration)).Deserialize(stream);
+        }
+        var helper = new EmailHelper(_testConfigPath);
+        var message = helper.ForType("HtmlMail")
+            .Map("Name", "Alice")
+            .BuildMessage(["alice@example.com"]);
+        var plainMessage = helper.ForType("PlainMail").BuildMessage(["alice@example.com"]);
+
+        // Assert
+        Assert.Equal(2, configuration.MailMessages.Count);
+        Assert.Equal("fr-FR", configuration.MailMessages[0].MessageCulture);
+        Assert.Equal("en-US", configuration.MailMessages[1].MessageCulture);
+        Assert.Equal("Welcome Alice", message.Subject);
+        Assert.Equal("<p>Hello Alice</p>", message.Body);
+        Assert.True(message.BodyIsHtml);
+        Assert.Equal("Plain subject", plainMessage.Subject);
+        Assert.Equal("Plain body", plainMessage.Body);
+        Assert.False(plainMessage.BodyIsHtml);
+    }
+
+    [Fact]
     public void Constructor_WithReadOnlyConfigFile_ShouldLoadTemplate()
     {
         // Arrange
@@ -142,6 +185,56 @@ public class EmailHelperTests : IDisposable
         // Assert
         Assert.Same(emailHelper, result); // Should return self for fluent interface
         Assert.NotNull(emailHelper.Pipeline);
+    }
+
+    [Fact]
+    public void ForType_AfterBuild_ShouldResetMappingsAndDeferEngineCreation()
+    {
+        // Arrange
+        _testMailConfiguration.MailMessages.Add(new MailMessageConfiguration
+        {
+            MessageType = "OtherMail",
+            MessageSubject = "Other: {MachineName.Value}",
+            MessageBody = "Other body: {SmtpServer.Value}"
+        });
+        var helper = new EmailHelper(_testMailConfiguration);
+        helper.ForType("TestMail")
+            .Map("MachineName", "Alice")
+            .Map("SmtpServer", "old.example.com")
+            .BuildMessage(["alice@example.com"]);
+        var previousPipeline = helper.Pipeline;
+        Assert.NotNull(helper.Engine);
+
+        // Act
+        helper.ForType("OtherMail");
+
+        // Assert
+        Assert.NotSame(previousPipeline, helper.Pipeline);
+        Assert.False(helper.Pipeline.HasEntity("MachineName"));
+        Assert.False(helper.Pipeline.HasEntity("SmtpServer"));
+        Assert.Null(helper.Engine);
+        helper.Map("MachineName", "Bob");
+        Assert.Null(helper.Engine);
+        var message = helper.BuildMessage(["bob@example.com"]);
+        Assert.Equal("Other: Bob", message.Subject);
+        Assert.Equal("Other body:", message.Body);
+    }
+
+    [Fact]
+    public void BuildMessage_WithUnknownTemplateType_ShouldThrowAtBuildTime()
+    {
+        // Arrange
+        var helper = new EmailHelper(_testMailConfiguration);
+        helper.ForType("UnknownMail").Map("MachineName", "Alice");
+        Assert.Null(helper.Engine);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            helper.BuildMessage(["alice@example.com"]));
+
+        // Assert
+        Assert.Equal("Mail type 'UnknownMail' was not found in the mail configuration.", exception.Message);
+        Assert.Null(helper.Engine);
     }
 
     [Fact]

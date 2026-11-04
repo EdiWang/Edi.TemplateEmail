@@ -9,7 +9,7 @@ These instructions apply to the entire repository. This .NET 10 library ships as
 - `src/Edi.TemplateEmail.Tests/`: xUnit v3 tests for both packages.
 - `src/Edi.TemplateEmail.TestConsole/`: interactive sample that can send real email; do not use it as an automated test.
 - `README.md`: installation and usage examples, including the XML template format.
-- `.github/workflows/dotnet.yml`: Release build, pack, and NuGet publication on pushes to `master`.
+- `.github/workflows/dotnet.yml`: Release build and tests on pull requests and pushes to `master`; NuGet publication only after successful validation on pushes to `master`.
 
 Keep the core package independent of SMTP dependencies. MailKit, MimeKit, and dependency injection helpers belong in the SMTP package.
 
@@ -22,7 +22,7 @@ dotnet build src/Edi.TemplateEmail.slnx --configuration Release
 dotnet test --project src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release
 ```
 
-- Run the build and tests for code changes. CI currently does not run tests, so a successful workflow does not replace local test validation.
+- Run the build and tests locally for code changes. CI also runs both checks and requires them to pass before publishing either NuGet package.
 - For documentation-only changes, check referenced paths, commands, and the diff; a build is unnecessary.
 - Report what was checked and any checks that could not run.
 

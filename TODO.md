@@ -73,17 +73,19 @@ Relevant file: `src/Edi.TemplateEmail.Smtp/SmtpExtensions.cs`.
 
 ## Issue 5: Make tests a prerequisite for publishing
 
-The local `dotnet test` runner configuration is fixed. The remaining work is CI
-integration and coverage of behavior that is still untested.
+The local `dotnet test` runner configuration, CI integration, and baseline
+coverage below are complete.
 
-- [ ] Run Release build and tests on pull requests as well as pushes to master.
-- [ ] Require successful tests before either NuGet package is published. Use:
+- [x] Run Release build and tests on pull requests as well as pushes to master.
+- [x] Require successful tests before either NuGet package is published. Use:
   `dotnet test --project src/Edi.TemplateEmail.Tests/Edi.TemplateEmail.Tests.csproj --configuration Release`.
-- [ ] Cover both DI registration overloads, helper lifetime/state isolation,
+- [x] Cover both DI registration overloads, helper lifetime/state isolation,
   `ForType()` reset behavior, unknown template types, and the literal XML shape
   using hand-written XML rather than only serializer-generated fixtures.
-- [ ] Add regression tests alongside the remaining fixes above. Keep all tests
-  local; do not execute the email-sending console as an automated test.
+
+Ongoing requirement: add regression tests alongside each remaining fix in its
+corresponding issue. Keep all tests local; do not execute the email-sending
+console as an automated test.
 
 Relevant files: `.github/workflows/dotnet.yml`, `src/Edi.TemplateEmail.Tests/`.
 
