@@ -11,7 +11,14 @@ public static class SmtpExtensions
 {
     public static MimeMessage ToMimeMessage(this CommonMailMessage message, EmailSettings settings)
     {
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(settings);
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.FromAddress, nameof(settings.FromAddress));
+        ArgumentNullException.ThrowIfNull(message.Receipts, nameof(message.Receipts));
+        if (message.Receipts.Length == 0)
+        {
+            throw new ArgumentException("At least one To recipient is required.", nameof(message.Receipts));
+        }
 
         var messageToSend = new MimeMessage();
         if (!string.IsNullOrEmpty(settings.SenderAddress))
@@ -46,6 +53,7 @@ public static class SmtpExtensions
     /// successful response or the original operation exception.
     /// </summary>
     /// <remarks>
+    /// Settings validation and MIME conversion complete before connecting or authenticating.
     /// Cancellation applies to connecting, authenticating, and sending, but not cleanup.
     /// No automatic retries are performed.
     /// </remarks>
@@ -58,6 +66,24 @@ public static class SmtpExtensions
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(settings);
+            ArgumentNullException.ThrowIfNull(settings.SmtpSettings, nameof(settings.SmtpSettings));
+            ArgumentException.ThrowIfNullOrWhiteSpace(settings.SmtpSettings.SmtpServer, nameof(settings.SmtpSettings.SmtpServer));
+            if (settings.SmtpSettings.SmtpServerPort is < 0 or > 65535)
+            {
+                throw new ArgumentOutOfRangeException(nameof(settings.SmtpSettings.SmtpServerPort));
+            }
+            if (!Enum.IsDefined(settings.SmtpSettings.SocketOptions))
+            {
+                throw new ArgumentOutOfRangeException(nameof(settings.SmtpSettings.SocketOptions));
+            }
+            if (!string.IsNullOrEmpty(settings.SmtpSettings.SmtpUserName))
+            {
+                ArgumentNullException.ThrowIfNull(settings.SmtpSettings.SmtpPassword, nameof(settings.SmtpSettings.SmtpPassword));
+            }
+
+            var messageToSend = message.ToMimeMessage(settings);
+
             if (settings.SmtpSettings.SkipCertificateValidation)
             {
                 smtp.ServerCertificateValidationCallback = (_, _, _, _) => true;
@@ -73,7 +99,6 @@ public static class SmtpExtensions
                 await smtp.AuthenticateAsync(settings.SmtpSettings.SmtpUserName, settings.SmtpSettings.SmtpPassword, cancellationToken);
             }
 
-            var messageToSend = message.ToMimeMessage(settings);
             return await smtp.SendAsync(messageToSend, cancellationToken: cancellationToken);
         }
         finally

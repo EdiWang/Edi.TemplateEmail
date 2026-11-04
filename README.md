@@ -104,6 +104,10 @@ var response = await message.SendAsync(emailSettings);
 
 `FromAddress` is required and independent of the SMTP login. A null or empty SMTP user name skips authentication. Optional `SenderAddress` and `SenderName` set the Sender header when sending on behalf of another address; `EmailDisplayName` names the From address.
 
+Before connecting or authenticating, `SendAsync` validates the settings and completes MIME conversion, including address parsing. SMTP settings require a nonblank server, a port from 0 through 65535, a defined `SecureSocketOptions` value, and a non-null password when a user name is supplied (an empty password is allowed). Port 0 retains MailKit's default-port selection. At least one To recipient is required; optional CC entries must also parse as mailbox addresses. Address parsing checks syntax, not whether a mailbox exists.
+
+Migration note: invalid input now fails before any SMTP connection, so input errors can take precedence over connection or authentication errors. Null inputs and missing To recipients produce argument exceptions instead of failing later during conversion or sending. Correct invalid settings or addresses before retrying; `ToMimeMessage` still works without SMTP settings.
+
 Choose `SmtpSettings.SocketOptions` for your server:
 
 | Mode | Behavior |

@@ -12,7 +12,7 @@ run the interactive console as an automated test.
   in validation errors.
 - [ ] In a breaking release, reject unknown token entities/properties with useful
   errors while retaining empty output for legitimate null values.
-- [ ] Validate SMTP settings and recipient addresses, and complete MIME
+- [x] Validate SMTP settings and recipient addresses, and complete MIME
   conversion before connecting or authenticating.
 - [ ] Test malformed configuration, duplicate keys, token typos, null values, and
   invalid recipients locally. Keep address parsing and SMTP dependencies in the

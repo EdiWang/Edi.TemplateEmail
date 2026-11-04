@@ -204,6 +204,198 @@ public class SmtpDeliveryTests
         Assert.True(smtp.ServerCertificateValidationCallback(null, null, null, SslPolicyErrors.RemoteCertificateChainErrors));
     }
 
+    [Fact]
+    public async Task SendAsync_WithMissingInputs_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        var cases = new (CommonMailMessage Message, EmailSettings Settings, string Parameter)[]
+        {
+            (null, _settings, "message"),
+            (_message, null, "settings"),
+            (_message, new EmailSettings(), nameof(EmailSettings.SmtpSettings))
+        };
+
+        foreach (var item in cases)
+        {
+            var smtp = new TestSmtpClient();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                item.Message.SendAsync(item.Settings, smtp, TestContext.Current.CancellationToken));
+
+            // Assert
+            Assert.Equal(item.Parameter, exception.ParamName);
+            Assert.Equal(["dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_WithMissingOrBlankHost_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        foreach (var host in new[] { null, "", " " })
+        {
+            _settings.SmtpSettings = new(host, null, null, 587);
+            var smtp = new TestSmtpClient();
+
+            // Act
+            var exception = await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+                _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+            // Assert
+            Assert.Equal(nameof(SmtpSettings.SmtpServer), exception.ParamName);
+            Assert.Equal(["dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_WithOutOfRangePort_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        foreach (var port in new[] { -1, 65536 })
+        {
+            _settings.SmtpSettings = new("smtp.example.com", null, null, port);
+            var smtp = new TestSmtpClient();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+                _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+            // Assert
+            Assert.Equal(nameof(SmtpSettings.SmtpServerPort), exception.ParamName);
+            Assert.Equal(["dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_WithUndefinedSocketOptions_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        _settings.SmtpSettings.SocketOptions = (SecureSocketOptions)int.MaxValue;
+        var smtp = new TestSmtpClient();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(nameof(SmtpSettings.SocketOptions), exception.ParamName);
+        Assert.Equal(["dispose"], smtp.Calls);
+    }
+
+    [Fact]
+    public async Task SendAsync_WithUserNameButNullPassword_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        _settings.SmtpSettings = new("smtp.example.com", "test-user", null, 587);
+        var smtp = new TestSmtpClient();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(nameof(SmtpSettings.SmtpPassword), exception.ParamName);
+        Assert.Equal(["dispose"], smtp.Calls);
+    }
+
+    [Fact]
+    public async Task SendAsync_WithBoundaryPortsAndEmptyPassword_ShouldConnectAndAuthenticate()
+    {
+        // Arrange
+        foreach (var port in new[] { 0, 65535 })
+        {
+            _settings.SmtpSettings = new("smtp.example.com", "test-user", "", port);
+            var smtp = new TestSmtpClient();
+
+            // Act
+            var response = await _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken);
+
+            // Assert
+            Assert.Equal("250 accepted", response);
+            Assert.Equal(port, smtp.Port);
+            Assert.Equal(["connect", "authenticate", "send", "disconnect", "dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_WithInvalidAddresses_ShouldPreserveParseExceptionDespiteDisposeFailure()
+    {
+        // Arrange
+        foreach (var field in new[] { "From", "Sender", "To", "CC" })
+        {
+            _settings.FromAddress = field == "From" ? "invalid@@example.com" : "from@example.com";
+            _settings.SenderAddress = field == "Sender" ? "invalid@@example.com" : null;
+            _message.Receipts = field == "To" ? ["invalid@@example.com"] : ["to@example.com"];
+            _message.CcReceipts = field == "CC" ? ["invalid@@example.com"] : null;
+            var smtp = new TestSmtpClient { DisposeException = new IOException("Dispose failed") };
+
+            // Act
+            await Assert.ThrowsAsync<ParseException>(() =>
+                _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+            // Assert
+            Assert.Equal(["dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_WithMissingOrBlankAddresses_ShouldRejectBeforeConnectingAndDispose()
+    {
+        // Arrange
+        var cases = new (string From, string[] To, string[] Cc)[]
+        {
+            (null, ["to@example.com"], null),
+            (" ", ["to@example.com"], null),
+            ("from@example.com", null, null),
+            ("from@example.com", [], null),
+            ("from@example.com", [null], null),
+            ("from@example.com", [""], null),
+            ("from@example.com", [" "], null),
+            ("from@example.com", ["to@example.com"], [null]),
+            ("from@example.com", ["to@example.com"], [""]),
+            ("from@example.com", ["to@example.com"], [" "])
+        };
+
+        foreach (var item in cases)
+        {
+            _settings.FromAddress = item.From;
+            _message.Receipts = item.To;
+            _message.CcReceipts = item.Cc;
+            var smtp = new TestSmtpClient();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() =>
+                _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken));
+
+            // Assert
+            Assert.True(exception is ArgumentException or ParseException);
+            Assert.Equal(["dispose"], smtp.Calls);
+        }
+    }
+
+    [Fact]
+    public async Task SendAsync_ShouldCompleteMimeConversionBeforeConnecting()
+    {
+        // Arrange
+        var smtp = new TestSmtpClient
+        {
+            OnConnect = () =>
+            {
+                _message.Subject = "Changed after connecting";
+                _message.Receipts[0] = "invalid@@example.com";
+            }
+        };
+
+        // Act
+        var response = await _message.SendAsync(_settings, smtp, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal("250 accepted", response);
+        Assert.Equal("Subject", smtp.SentMessage.Subject);
+        Assert.Equal("to@example.com", Assert.Single(smtp.SentMessage.To.Mailboxes).Address);
+    }
+
     private sealed class TestSmtpClient : SmtpClient
     {
         private bool _connected;
@@ -215,6 +407,8 @@ public class SmtpDeliveryTests
         public Exception DisposeException { get; init; }
         public Task<string> SendTask { get; set; } = Task.FromResult("250 accepted");
         public Action OnSend { get; set; }
+        public Action OnConnect { get; init; }
+        public MimeMessage SentMessage { get; private set; }
         public string Host { get; private set; }
         public int Port { get; private set; }
         public SecureSocketOptions SocketOptions { get; private set; }
@@ -235,6 +429,7 @@ public class SmtpDeliveryTests
             cancellationToken.ThrowIfCancellationRequested();
             if (ConnectException is not null) return Task.FromException(ConnectException);
             _connected = true;
+            OnConnect?.Invoke();
             return Task.CompletedTask;
         }
 
@@ -249,6 +444,7 @@ public class SmtpDeliveryTests
         public override Task<string> SendAsync(FormatOptions options, MimeMessage message, CancellationToken cancellationToken = default, ITransferProgress progress = null)
         {
             Calls.Add("send");
+            SentMessage = message;
             SendToken = cancellationToken;
             cancellationToken.ThrowIfCancellationRequested();
             OnSend?.Invoke();
