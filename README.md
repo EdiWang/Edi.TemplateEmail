@@ -148,3 +148,14 @@ services.AddTemplateEmail(configPath, settings =>
 Inject `IEmailHelper` and `EmailSettings`, and call `ForType` for each message. The helper is transient, settings are singleton, and builders are created per call rather than registered as shared services. The example uses anonymous SMTP; set credentials as needed.
 
 The file-path overload reads XML each time a helper is resolved; each helper reuses that configuration for its builders. The overload accepting `MailConfiguration` shares the supplied instance. There is no configuration cache or automatic reload.
+
+## Interactive sample
+
+The console sample reads `mailConfiguration.xml` from the current working directory using `Path.Combine`. To run it on Windows, Linux, or macOS, start from the repository root:
+
+```sh
+cd src/Edi.TemplateEmail.TestConsole
+dotnet run --configuration Release
+```
+
+When launching the compiled sample instead, use its output directory as the working directory; the build copies `mailConfiguration.xml` there. The sample prompts for SMTP settings and sends a real email, so run it manually rather than as an automated test.

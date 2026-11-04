@@ -44,7 +44,7 @@ Relevant files: `src/Edi.TemplateEmail/TemplateMailMessage.cs`,
 
 ## Issue 3: Use cross-platform template paths
 
-- [ ] Replace manual backslash path construction in
+- [x] Replace manual backslash path construction in
   `src/Edi.TemplateEmail.TestConsole/Program.cs` with `Path.Combine` and document
   the sample's expected template location for cross-platform use.
 

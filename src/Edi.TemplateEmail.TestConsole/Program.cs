@@ -21,7 +21,7 @@ var toAddress = AnsiConsole.Ask<string>("To email address: ");
 var fromAddress = AnsiConsole.Ask<string>("From email address: ");
 var displayName = AnsiConsole.Ask<string>("Sender display name: ");
 
-var configSource = $"{Directory.GetCurrentDirectory()}\\mailConfiguration.xml";
+var configSource = Path.Combine(Directory.GetCurrentDirectory(), "mailConfiguration.xml");
 
 var emailSettings = new EmailSettings
 {
