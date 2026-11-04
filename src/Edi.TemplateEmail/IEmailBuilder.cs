@@ -5,6 +5,10 @@ namespace Edi.TemplateEmail;
 /// </summary>
 public interface IEmailBuilder
 {
+    /// <summary>
+    /// Maps a value. HTML bodies encode ordinary values; map a TrustedHtml value
+    /// explicitly to insert a complete trusted HTML fragment without encoding.
+    /// </summary>
     IEmailBuilder Map(string name, object value);
     IEmailBuilder MapRange(params (string name, object value)[] values);
 

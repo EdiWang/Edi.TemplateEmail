@@ -39,7 +39,7 @@ internal sealed class EmailBuilder(MailConfiguration configuration, string mailT
         return new CommonMailMessage
         {
             Subject = engine.Format(template.Subject).Trim(),
-            Body = engine.Format(template.Text).Trim(),
+            Body = engine.Format(template.Text, encodeHtml: template.IsHtml).Trim(),
             Receipts = [.. receipts],
             CcReceipts = ccReceipts is null ? null : [.. ccReceipts],
             BodyIsHtml = template.IsHtml

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Edi.TemplateEmail;
 
@@ -13,11 +14,24 @@ public partial class TemplateEngine(TemplateMailMessage provider, TemplatePipeli
 
     public string Format(string text)
     {
+        return Format(text, false);
+    }
+
+    /// <summary>
+    /// Formats tokens, optionally HTML-encoding ordinary mapped values while
+    /// preserving template markup and explicitly trusted HTML fragments.
+    /// </summary>
+    public string Format(string text, bool encodeHtml)
+    {
         return FormatRegex().Replace(text, match =>
         {
             string entity = match.Groups["Entity"].Value;
             string property = match.Groups["Property"].Value;
-            return Pipeline.HasEntity(entity) ? Pipeline[entity].GetValue(property) : string.Empty;
+            if (!Pipeline.HasEntity(entity)) return string.Empty;
+
+            var item = Pipeline[entity];
+            var value = item.GetValue(property);
+            return encodeHtml && item.Value is not TrustedHtml ? WebUtility.HtmlEncode(value) : value;
         });
     }
 }

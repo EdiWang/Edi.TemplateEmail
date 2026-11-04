@@ -111,6 +111,51 @@ var message = emailHelper.ForType("TestMail")
 var result = await message.SendAsync(emailSettings);
 ```
 
+### HTML body values and trusted markup
+
+For XML templates with `IsHtml="true"`, ordinary `Map` and `MapRange` values are encoded with [.NET HTML encoding](https://learn.microsoft.com/en-us/dotnet/api/system.net.webutility.htmlencode?view=net-10.0) when inserted into the body. This includes object property values. Template markup remains unchanged; subjects and plain-text bodies keep their normal string values.
+
+To insert a complete trusted HTML fragment, map it explicitly as `TrustedHtml`. For example, add this entry inside the XML `MailConfiguration` root:
+
+```xml
+<MailMessage MessageType="HtmlNotice" IsHtml="true">
+  <MessageSubject>Hello {User.Name}</MessageSubject>
+  <MessageBody><![CDATA[<p>Hello {User.Name}</p>{Footer.Value}]]></MessageBody>
+</MailMessage>
+```
+
+```csharp
+var message = emailHelper.ForType("HtmlNotice")
+    .Map("User", new { Name = "Alice & Bob" })
+    .Map("Footer", new TrustedHtml("<strong>Terms apply</strong>"))
+    .BuildMessage([toAddress]);
+```
+
+The body becomes `<p>Hello Alice &amp; Bob</p><strong>Terms apply</strong>`. `MapRange` accepts `TrustedHtml` in the same way. Wrap only trusted or previously sanitized markup; `TrustedHtml` bypasses encoding and does not sanitize its input. The trust marker applies to the complete mapped entity. To insert a fragment stored in an object property, map that fragment separately and use its `{Entity.Value}` token. Wrappers inside an ordinary mapped object remain encoded.
+
+Keep ordinary tokens in HTML text or quoted attributes. Templates are trusted markup; HTML encoding does not make tokens suitable for tag names, unquoted attributes, event handlers, styles, or executable content. The engine performs token replacement without parsing HTML contexts. See [Microsoft's guidance on output encoding contexts](https://learn.microsoft.com/en-us/aspnet/core/security/cross-site-scripting?view=aspnetcore-10.0).
+
+For URL attributes, validate the supplied URL before mapping it. HTML encoding escapes separators and quotes but does not validate URL schemes or destinations. For a template containing `<a href="{Link.Value}">{Label.Value}</a>`, an application that permits only HTTPS links to `example.com` can use:
+
+```csharp
+var suppliedUrl = "https://example.com/account?view=profile&lang=en";
+if (!Uri.TryCreate(suppliedUrl, UriKind.Absolute, out var link)
+    || link.Scheme != Uri.UriSchemeHttps
+    || !string.Equals(link.Host, "example.com", StringComparison.OrdinalIgnoreCase))
+{
+    throw new ArgumentException("Expected an HTTPS link to example.com.", nameof(suppliedUrl));
+}
+
+var builder = emailHelper.ForType("AccountLink")
+    .MapRange(("Link", link.AbsoluteUri), ("Label", "Open account"));
+```
+
+Use an XML `MailMessage` named `AccountLink` with `IsHtml="true"` for that body and finish with `builder.BuildMessage(...)`. Apply your application's URL rules, including any port or path restrictions. Encode individual URL components when constructing a URL; let the builder HTML-encode the complete validated URL when inserting it into a quoted attribute.
+
+#### Migrating HTML templates
+
+This changes the output of existing HTML templates that map markup as ordinary strings. Move fixed markup into the XML body, or explicitly wrap each trusted fragment with `new TrustedHtml(...)`. Map ordinary text without pre-encoding; pre-encoded text is encoded again. No XML schema change is required. Subject and plain-text rendering are unchanged. Direct `TemplateEngine.Format(text)` calls retain unencoded formatting; use `Format(text, encodeHtml: true)` to encode mapped values when rendering HTML directly.
+
 ### SMTP results and cancellation
 
 `SendAsync` returns the SMTP server's final response after MailKit completes sending. See the [MailKit SendAsync documentation](https://mimekit.net/docs/html/M_MailKit_Net_Smtp_SmtpClient_SendAsync_1.htm). A successful result records server acceptance; downstream delivery can still fail.
