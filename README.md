@@ -179,7 +179,28 @@ services.AddTemplateEmail(configPath, settings =>
 
 Inject `IEmailHelper` and `EmailSettings`, and call `ForType` for each message. The helper is transient, settings are singleton, and builders are created per call rather than registered as shared services. The example uses anonymous SMTP; set credentials as needed.
 
-The file-path overload reads XML each time a helper is resolved; each helper reuses that configuration for its builders. The overload accepting `MailConfiguration` shares the supplied instance. There is no configuration cache or automatic reload.
+The file-path overload reads XML each time a helper is resolved. New helpers see file edits; existing helpers and their builders keep the configuration they loaded. A missing file fails the next resolution.
+
+For frequent helper resolution or large template files, load XML once during application setup and use the existing `MailConfiguration` overload:
+
+```csharp
+using Edi.TemplateEmail;
+using System.Xml.Serialization;
+
+MailConfiguration configuration;
+using (var stream = File.OpenRead(configPath))
+{
+    configuration = (MailConfiguration)new XmlSerializer(typeof(MailConfiguration)).Deserialize(stream);
+}
+
+services.AddTemplateEmail(configuration, settings =>
+{
+    settings.FromAddress = "notifications@example.com";
+    settings.SmtpSettings = new("smtp.example.com", null, null, 587);
+});
+```
+
+Helpers remain transient and validate the shared configuration when resolved; each `ForType` still creates an independent builder. The configuration is shared without copying or freezing, so treat it as read-only during use. File edits or deletion do not affect this registration. To adopt a new snapshot, deserialize a fresh configuration and create a new registration/provider, for example on application restart; existing helpers keep the original instance. There is no library-managed cache, file watcher, or automatic reload.
 
 ## Interactive sample
 

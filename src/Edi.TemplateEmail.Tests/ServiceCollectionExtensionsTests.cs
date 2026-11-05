@@ -1,5 +1,6 @@
 using Edi.TemplateEmail.Smtp;
 using Microsoft.Extensions.DependencyInjection;
+using System.Xml.Serialization;
 using Xunit;
 
 namespace Edi.TemplateEmail.Tests;
@@ -64,6 +65,70 @@ public class ServiceCollectionExtensionsTests : IDisposable
         Assert.Same(smtpSettings, settings.SmtpSettings);
         Assert.Same(settings, provider.GetRequiredService<EmailSettings>());
         Assert.Equal(1, configureCalls);
+    }
+
+    [Fact]
+    public void AddTemplateEmail_WithConfigPath_ShouldReadChangesOnlyForNewHelpers()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddTemplateEmail(_testConfigPath, _ => { });
+        using var provider = services.BuildServiceProvider();
+        var originalHelper = provider.GetRequiredService<IEmailHelper>();
+        var originalBuilder = originalHelper.ForType("Welcome").Map("Name", "Alice");
+
+        // Act
+        File.WriteAllText(_testConfigPath, File.ReadAllText(_testConfigPath)
+            .Replace("Welcome {Name.Value}", "Updated {Name.Value}"));
+        var updatedHelper = provider.GetRequiredService<IEmailHelper>();
+        File.Delete(_testConfigPath);
+
+        // Assert
+        Assert.Equal("Welcome Alice", originalBuilder.BuildMessage(["alice@example.com"]).Subject);
+        Assert.Equal("Welcome Bob", originalHelper.ForType("Welcome").Map("Name", "Bob")
+            .BuildMessage(["bob@example.com"]).Subject);
+        Assert.Equal("Updated Other", updatedHelper.ForType("Welcome").Map("Name", "Other")
+            .BuildMessage(["other@example.com"]).Subject);
+        Assert.Throws<FileNotFoundException>(() => provider.GetRequiredService<IEmailHelper>());
+    }
+
+    [Fact]
+    public void AddTemplateEmail_WithLoadedConfiguration_ShouldReuseUntilExplicitlyRegisteredAgain()
+    {
+        // Arrange
+        var serializer = new XmlSerializer(typeof(MailConfiguration));
+        MailConfiguration configuration;
+        using (var stream = File.OpenRead(_testConfigPath))
+        {
+            configuration = (MailConfiguration)serializer.Deserialize(stream);
+        }
+        var services = new ServiceCollection();
+        services.AddTemplateEmail(configuration, _ => { });
+        using var provider = services.BuildServiceProvider();
+        var originalHelper = provider.GetRequiredService<IEmailHelper>();
+        var originalBuilder = originalHelper.ForType("Welcome").Map("Name", "Alice");
+
+        // Act
+        File.WriteAllText(_testConfigPath, File.ReadAllText(_testConfigPath)
+            .Replace("Welcome {Name.Value}", "Updated {Name.Value}"));
+        var laterHelper = provider.GetRequiredService<IEmailHelper>();
+        using (var stream = File.OpenRead(_testConfigPath))
+        {
+            configuration = (MailConfiguration)serializer.Deserialize(stream);
+        }
+        var reloadedServices = new ServiceCollection();
+        reloadedServices.AddTemplateEmail(configuration, _ => { });
+        using var reloadedProvider = reloadedServices.BuildServiceProvider();
+        File.Delete(_testConfigPath);
+
+        // Assert
+        Assert.Equal("Welcome Alice", originalBuilder.BuildMessage(["alice@example.com"]).Subject);
+        Assert.Equal("Welcome Bob", laterHelper.ForType("Welcome").Map("Name", "Bob")
+            .BuildMessage(["bob@example.com"]).Subject);
+        Assert.Equal("Welcome Again", provider.GetRequiredService<IEmailHelper>().ForType("Welcome").Map("Name", "Again")
+            .BuildMessage(["again@example.com"]).Subject);
+        Assert.Equal("Updated Other", reloadedProvider.GetRequiredService<IEmailHelper>().ForType("Welcome").Map("Name", "Other")
+            .BuildMessage(["other@example.com"]).Subject);
     }
 
     [Fact]
