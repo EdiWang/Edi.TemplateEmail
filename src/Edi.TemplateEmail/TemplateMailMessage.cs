@@ -14,6 +14,11 @@ public class TemplateMailMessage
     public bool Loaded { get; }
 
     public TemplateMailMessage(MailConfiguration mailConfig, string messageType)
+        : this(mailConfig, messageType, null)
+    {
+    }
+
+    internal TemplateMailMessage(MailConfiguration mailConfig, string messageType, CultureInfo culture)
     {
         Loaded = false;
 
@@ -25,14 +30,27 @@ public class TemplateMailMessage
             string.CompareOrdinal(mail.MessageType, messageType) == 0);
         if (possibleMails.Count == 0) return;
 
-        // Now check if we have a mail with the current culture
-        var mailMessageConfiguration =
-            possibleMails.Find(
-                mail =>
-                    !string.IsNullOrEmpty(mail.MessageCulture)
-                    && mail.MessageCulture.Equals(CultureInfo.CurrentCulture.Name, StringComparison.InvariantCultureIgnoreCase)
-            ) ?? possibleMails[0];
-        // If we can't find one, then use the first one we get
+        MailMessageConfiguration mailMessageConfiguration;
+        if (culture is null)
+        {
+            mailMessageConfiguration = possibleMails.Find(mail =>
+                !string.IsNullOrEmpty(mail.MessageCulture)
+                && mail.MessageCulture.Equals(CultureInfo.CurrentCulture.Name, StringComparison.InvariantCultureIgnoreCase))
+                ?? possibleMails[0];
+        }
+        else
+        {
+            mailMessageConfiguration = null;
+            for (var candidate = culture; candidate.Name.Length > 0; candidate = candidate.Parent)
+            {
+                mailMessageConfiguration = possibleMails.Find(mail =>
+                    candidate.Name.Equals(mail.MessageCulture, StringComparison.InvariantCultureIgnoreCase));
+                if (mailMessageConfiguration is not null) break;
+            }
+
+            mailMessageConfiguration ??= possibleMails.Find(mail => string.IsNullOrEmpty(mail.MessageCulture));
+            if (mailMessageConfiguration is null) return;
+        }
 
         // Map configured values to this instance
         Text = mailMessageConfiguration.MessageBody;

@@ -466,7 +466,7 @@ public class SmtpDeliveryTests
         {
             Calls.Add("dispose");
             base.Dispose(disposing);
-            if (DisposeException is not null) throw DisposeException;
+            if (disposing && DisposeException is not null) throw DisposeException;
         }
     }
 }

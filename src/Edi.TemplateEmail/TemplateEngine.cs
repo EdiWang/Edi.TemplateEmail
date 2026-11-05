@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Edi.TemplateEmail;
@@ -23,6 +24,11 @@ public partial class TemplateEngine(TemplateMailMessage provider, TemplatePipeli
     /// </summary>
     public string Format(string text, bool encodeHtml)
     {
+        return Format(text, encodeHtml, null);
+    }
+
+    internal string Format(string text, bool encodeHtml, CultureInfo culture)
+    {
         return FormatRegex().Replace(text, match =>
         {
             string entity = match.Groups["Entity"].Value;
@@ -30,7 +36,7 @@ public partial class TemplateEngine(TemplateMailMessage provider, TemplatePipeli
             if (!Pipeline.HasEntity(entity)) return string.Empty;
 
             var item = Pipeline[entity];
-            var value = item.GetValue(property);
+            var value = item.GetValue(property, culture);
             return encodeHtml && item.Value is not TrustedHtml ? WebUtility.HtmlEncode(value) : value;
         });
     }

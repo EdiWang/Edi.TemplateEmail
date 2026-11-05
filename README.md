@@ -35,7 +35,7 @@ Place `mailConfiguration.xml` in your application's output/deployment directory,
 
 `MessageType` and `IsHtml` are attributes; `MessageSubject`, `MessageBody`, and optional `MessageCulture` are elements. Use `IsHtml="false"` for plain text.
 
-Template selection matches `MessageType` exactly, prefers a case-insensitive match between `MessageCulture` and `CultureInfo.CurrentCulture.Name`, and otherwise uses the first entry of that message type.
+Without an explicit culture, template selection matches `MessageType` exactly, prefers a case-insensitive match between `MessageCulture` and `CultureInfo.CurrentCulture.Name`, and otherwise uses the first entry of that message type.
 
 Both `EmailHelper` constructors validate configuration when the helper is created. `MessageType` must be nonblank; `MessageSubject` and `MessageBody` must be present and non-null. Empty strings are allowed: use `<MessageSubject />` or `<MessageBody />` for intentionally empty content. `MessageCulture` remains optional, and omitted `IsHtml` still defaults to `false`. A null configuration, null `MailMessages` list, or null template entry is rejected; an empty list remains valid.
 
@@ -65,13 +65,45 @@ var message = emailHelper.ForType("Welcome")
 
 Separate builders from the same helper can be interleaved or built in parallel. Use one builder per message; do not use the same builder concurrently or mutate shared configuration or mapped objects during builds.
 
+## Recipient culture
+
+Pass the recipient's `CultureInfo` to `ForType` to select and format a message independently of `CurrentCulture`. Use the existing XML shape for localized templates and an entry without `MessageCulture` (or with an empty element) as the explicit default:
+
+```xml
+<MailConfiguration>
+  <MailMessage MessageType="Invoice" IsHtml="false">
+    <MessageSubject>Invoice {Invoice.Number}</MessageSubject>
+    <MessageBody>Total: {Invoice.Total}, date: {Invoice.Date}</MessageBody>
+  </MailMessage>
+  <MailMessage MessageType="Invoice" IsHtml="false">
+    <MessageCulture>fr</MessageCulture>
+    <MessageSubject>Facture {Invoice.Number}</MessageSubject>
+    <MessageBody>Total : {Invoice.Total}, date : {Invoice.Date}</MessageBody>
+  </MailMessage>
+</MailConfiguration>
+```
+
+```csharp
+using System.Globalization;
+
+var message = emailHelper.ForType("Invoice", CultureInfo.GetCultureInfo("fr-CA"))
+    .Map("Invoice", new { Number = 42, Total = 1234.5m, Date = new DateTime(2026, 11, 5) })
+    .BuildMessage(["alice@example.com"]);
+```
+
+Selection tries the exact culture, each parent culture in order, then the explicit default. In this example `fr-CA` uses the `fr` template; add a `fr-CA` entry to override it. Culture names are compared without case sensitivity, while message types remain case-sensitive. `CultureInfo.InvariantCulture` selects only the default. If neither a match nor a default exists, `BuildMessage` throws `InvalidOperationException` identifying the type and requested culture. The built-in helper rejects a null culture with `ArgumentNullException`.
+
+Dates, numbers, and other `IFormattable` values use `ToString(null, culture)`, both for whole mapped values and object properties. Formatting always uses the requested culture, even when the template comes from a parent or the default. Other values retain their custom `ToString()` behavior. No ambient culture is changed; use independent builders for different recipients and do not mutate the supplied culture during builds.
+
+Compatibility note: `ForType(mailType)` retains its existing selection and formatting behavior, including first-entry fallback. Template selection and engine creation remain deferred until `BuildMessage` for both overloads. Existing third-party `IEmailHelper` implementations can keep their original method; the new overload has a default implementation that throws `NotSupportedException` until they implement explicit culture support. `IEmailBuilder` is unchanged.
+
 ## Token mapping
 
 - Tokens use `{Entity.Property}` with case-sensitive names; both parts match `\w+`.
-- `{Entity.Value}` uses the entire mapped value's `ToString()`. `Value` is reserved, including when the mapped object has a property with that name. Map that property's value separately to render it.
+- `{Entity.Value}` formats the entire mapped value, using its `ToString()` or culture-aware formatting when an explicit culture is supplied. `Value` is reserved, including when the mapped object has a property with that name. Map that property's value separately to render it.
 - Other property names resolve public, readable, non-indexed instance properties. Strings return the same string for any property name; values without public properties fall back to `ToString()`.
 - Missing entities/properties, unsupported properties, and null values render as empty strings. Exceptions from readable getters propagate.
-- Dates and numbers use their normal `ToString()` behavior and the current culture where applicable.
+- Without an explicit culture, dates and numbers use their normal `ToString()` behavior and the current culture where applicable. With an explicit culture, `IFormattable` values use that culture as described above.
 
 ## HTML values
 

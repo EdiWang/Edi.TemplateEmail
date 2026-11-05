@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Xml.Serialization;
 
@@ -31,6 +32,15 @@ public class EmailHelper : IEmailHelper
     public IEmailBuilder ForType(string mailType)
     {
         return new EmailBuilder(_mailConfiguration, mailType);
+    }
+
+    /// <summary>
+    /// Creates an independent builder using the specified culture for template selection and formatting.
+    /// </summary>
+    public IEmailBuilder ForType(string mailType, CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+        return new EmailBuilder(_mailConfiguration, mailType, culture);
     }
 
     private static void ValidateConfiguration(MailConfiguration configuration)

@@ -1,8 +1,9 @@
 using System;
+using System.Globalization;
 
 namespace Edi.TemplateEmail;
 
-internal sealed class EmailBuilder(MailConfiguration configuration, string mailType) : IEmailBuilder
+internal sealed class EmailBuilder(MailConfiguration configuration, string mailType, CultureInfo culture = null) : IEmailBuilder
 {
     private readonly TemplatePipeline _pipeline = new();
 
@@ -29,17 +30,19 @@ internal sealed class EmailBuilder(MailConfiguration configuration, string mailT
             throw new ArgumentNullException(nameof(receipts));
         }
 
-        var template = new TemplateMailMessage(configuration, mailType);
+        var template = new TemplateMailMessage(configuration, mailType, culture);
         if (!template.Loaded)
         {
-            throw new InvalidOperationException($"Mail type '{mailType}' was not found in the mail configuration.");
+            throw new InvalidOperationException(culture is null
+                ? $"Mail type '{mailType}' was not found in the mail configuration."
+                : $"Mail type '{mailType}' has no template for culture '{culture.Name}' or its parents, and no default template.");
         }
 
         var engine = new TemplateEngine(template, _pipeline);
         return new CommonMailMessage
         {
-            Subject = engine.Format(template.Subject).Trim(),
-            Body = engine.Format(template.Text, encodeHtml: template.IsHtml).Trim(),
+            Subject = engine.Format(template.Subject, false, culture).Trim(),
+            Body = engine.Format(template.Text, template.IsHtml, culture).Trim(),
             Receipts = [.. receipts],
             CcReceipts = ccReceipts is null ? null : [.. ccReceipts],
             BodyIsHtml = template.IsHtml

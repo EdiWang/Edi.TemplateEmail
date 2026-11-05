@@ -27,13 +27,13 @@ Relevant files: `src/Edi.TemplateEmail/EmailHelper.cs`,
 
 ## Issue 2: Select and format templates with an explicit culture
 
-- [ ] Accept the recipient's culture explicitly for template selection and
+- [x] Accept the recipient's culture explicitly for template selection and
   formatting.
-- [ ] Define fallback as exact culture, parent culture, then an explicit default
+- [x] Define fallback as exact culture, parent culture, then an explicit default
   template.
-- [ ] Use the selected culture consistently for supported date/number formatting.
+- [x] Use the selected culture consistently for supported date/number formatting.
   Preserve custom `ToString()` behavior where culture does not apply.
-- [ ] Test exact/parent/default selection, culture-name casing, and date/number
+- [x] Test exact/parent/default selection, culture-name casing, and date/number
   output.
 
 Relevant files: `src/Edi.TemplateEmail/TemplateMailMessage.cs`,
